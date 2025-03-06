@@ -11,6 +11,7 @@
   "author": "Danial Chitnis",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.13.9",
     "typescript": "^5.8.2",
     "vite": "^6.2.0"
   }

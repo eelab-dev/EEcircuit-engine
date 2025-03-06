@@ -17,12 +17,12 @@ export class Simulation {
   //const commandList = [" ", "source test.cir", "run", "set filetype=ascii", "write out.raw"];
   private commandList = [" ", "source test.cir", "run", "write out.raw"];
   private cmd = 0;
-  private dataRaw = new Uint8Array();
-  private results = {} as ResultType;
+  private dataRaw: Uint8Array = new Uint8Array();
+  private results: ResultType = {} as ResultType;
   private output = "";
   private info = "";
   private initInfo = "";
-  private error = [] as string[];
+  private error: string[] = [];
   private initialized = false;
 
   private netList = "";
@@ -193,6 +193,3 @@ export class Simulation {
     //console.log("simLink-> ", message, optionalParams);
   };
 }
-
-export const simulation = new Simulation();
-Comlink.expose(simulation);
