@@ -1,6 +1,6 @@
 name: Next Build Test Publish
 
-env:
+#env:
   #GH_TOKEN: ${{secrets.PULL_REQ}}
 
 on:
