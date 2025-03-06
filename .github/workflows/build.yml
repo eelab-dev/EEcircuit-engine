@@ -60,7 +60,7 @@ jobs:
         deno-version: v2.x
 
     - name: Test
-      run: deno ./test/test.ts
+      run: deno --allow-read --allow-write ./test/test.ts
 
     - name: Deploy to npm
       run: ls
