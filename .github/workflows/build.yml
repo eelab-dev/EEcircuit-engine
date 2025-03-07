@@ -1,8 +1,5 @@
 name: Next Build Test Publish
 
-env:
-  NPM_PUBLISH: ${{secrets.NPM_PUBLISH}}
-
 on:
   schedule:
     - cron: '0 0 * * 0'  # Runs every Sunday at midnight
@@ -31,19 +28,23 @@ jobs:
     - name: Create Empty Build Directory
       run: mkdir -p Docker/build
 
-    - name: Build Docker Image
-      run: docker build --no-cache -t eecircuit ./Docker
+    #- name: Build Docker Image
+    #  run: docker build --no-cache -t eecircuit ./Docker
 
-    - name: Run Docker Container
-      run: docker run -t -v $(realpath ./Docker):/mnt eecircuit
+    #- name: Run Docker Container
+    #  run: docker run -t -v $(realpath ./Docker):/mnt eecircuit
 
-    - name: Run Inject.mjs
-      run: node ./Docker/inject.mjs
+    #- name: Run Inject.mjs
+    #  run: node ./Docker/inject.mjs
 
-    - name: Rename and Copy Files to Main Directory
-      run: |
-        cp ./Docker/build/spice.wasm ./src/spice.wasm
-        cp ./Docker/build/spice-eesim.js ./src/spice.js
+    #- name: Rename and Copy Files to Main Directory
+    #  run: |
+    #    cp ./Docker/build/spice.wasm ./src/spice.wasm
+    #    cp ./Docker/build/spice-eesim.js ./src/spice.js
+
+    - uses: actions/setup-node@v4
+      with:
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Update Dependencies
       run: npx --yes npm-check-updates -u
@@ -71,7 +72,7 @@ jobs:
         npm version "$NEW_VERSION" --no-git-tag-version
 
     - name: Publish to npm
-      run: npm publish --tag next
+      run: npm publish --access public --tag next
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
 
