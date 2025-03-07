@@ -1,6 +1,6 @@
-name: Next Build Deploy Test Push
+name: Next Build Test Publish
 
-env:
+#env:
   #GH_TOKEN: ${{secrets.PULL_REQ}}
 
 on:
@@ -42,8 +42,8 @@ jobs:
 
     - name: Rename and Copy Files to Main Directory
       run: |
-        cp ./Docker/build/spice.wasm ./src/sim/spice.wasm
-        cp ./Docker/build/spice-eesim.js ./src/sim/spice.js
+        cp ./Docker/build/spice.wasm ./src/spice.wasm
+        cp ./Docker/build/spice-eesim.js ./src/spice.js
 
     - name: Update Dependencies
       run: npx --yes npm-check-updates -u
@@ -62,8 +62,18 @@ jobs:
     - name: Test
       run: deno --allow-read --allow-write ./test/test.ts
 
-    - name: Deploy to npm
-      run: ls
+    - name: Get the current version and set dynamic next version
+      run: |
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $CURRENT_VERSION"
+        NEW_VERSION="${CURRENT_VERSION}-next.$(date +%s)"
+        echo "New version: $NEW_VERSION"
+        npm version "$NEW_VERSION" --no-git-tag-version
+
+    - name: Publish to npm
+      run: npm publish --tag next
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 
 
