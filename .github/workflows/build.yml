@@ -1,7 +1,7 @@
 name: Next Build Test Publish
 
-#env:
-  #GH_TOKEN: ${{secrets.PULL_REQ}}
+env:
+  NPM_PUBLISH: ${{secrets.NPM_PUBLISH}}
 
 on:
   schedule:
@@ -73,7 +73,7 @@ jobs:
     - name: Publish to npm
       run: npm publish --tag next
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
 
 
 
