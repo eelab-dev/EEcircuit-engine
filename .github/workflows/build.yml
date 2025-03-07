@@ -2,7 +2,7 @@ name: Next Build Test Publish
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Runs every Sunday at midnight
+    - cron: '0 0 * * 6'  # Runs every Saturday at midnight
   workflow_dispatch:      # Allows manual triggering
 
 jobs:
