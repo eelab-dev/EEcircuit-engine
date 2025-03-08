@@ -8,7 +8,7 @@ import * as ptm from "./models/ptm.ts";
 import * as skyWater from "./models/skywater/models.ts";
 import Module from "./spice.js";
 
-import readOutput, { ResultType } from "./readOutput.ts";
+import { readOutput, ResultType } from "./readOutput.ts";
 
 //export { ResultType };
 
@@ -63,7 +63,7 @@ export class Simulation {
           console.error(e);
           this.error.push(e);
         } else {
-          console.log(e);
+          this.log_debug(e);
         }
       },
       preRun: [
@@ -88,8 +88,6 @@ export class Simulation {
     module.FS?.writeFile("/modelcard.ptm", ptm.ptm);
     module.FS?.writeFile("/modelcard.skywater", skyWater.models);
     module.FS?.writeFile("/modelcard.CMOS90", circuits.strModelCMOS90);
-    //module.FS.writeFile("/test.cir", circuits.bsimTrans);
-    console.log("init");
 
     module.setHandleThings(() => {
       this.log_debug("handle other things!!!!!");
@@ -137,7 +135,7 @@ export class Simulation {
 
   public start = (): Promise<void> => {
     this.start2();
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       this.resolveInit = resolve;
     });
   };
@@ -151,18 +149,19 @@ export class Simulation {
       this.log_debug("🥳", "resolveWait");
       this.resolveWait();
     }
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       this.resolve = resolve;
     });
   };
 
   private waitSimResolve = (): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       this.resolveWait = resolve;
     });
   };
 
   private outputEvent = (out: string) => {
+    void out;
     /** */
   };
 
@@ -189,7 +188,8 @@ export class Simulation {
   public isInitialized = (): boolean => {
     return this.initialized;
   };
-  private log_debug = (message?: any, ...optionalParams: any[]) => {
-    //console.log("simLink-> ", message, optionalParams);
+  private log_debug = (message?: unknown, ...optionalParams: unknown[]) => {
+    const isDebug = false;
+    if (isDebug) console.log("simLink-> ", message, optionalParams);
   };
 }
