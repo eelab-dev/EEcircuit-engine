@@ -1,4 +1,17 @@
 import { Simulation } from "./simulationLink.ts";
-import type { ResultType } from "./readOutput.ts";
+import type {
+  ResultType,
+  RealNumber,
+  ComplexNumber,
+  RealDataType,
+  ComplexDataType,
+} from "./readOutput.ts";
 
-export { Simulation, ResultType };
+export {
+  Simulation,
+  ResultType,
+  RealNumber,
+  ComplexNumber,
+  RealDataType,
+  ComplexDataType,
+};

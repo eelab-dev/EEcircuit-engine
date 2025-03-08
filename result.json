@@ -1,6 +1,16 @@
 {
-  "header": "Title: basic rlc circuit \nDate: Sat Mar  8 01:14:04  2025\nCommand: ngspice-44.2, Build Tue Mar  4 21:42:17 UTC 2025\nPlotname: Transient Analysis\nFlags: real\nNo. Variables: 8\nNo. Points: 643\nVariables:\n\t0\ttime\ttime\n\t1\tv(1)\tvoltage\n\t2\tv(2)\tvoltage\n\t3\ti(l)\tcurrent\n\t4\tv(m1#gate)\tvoltage\n\t5\tv(vdd)\tvoltage\n\t6\ti(vdd)\tcurrent\n\t7\ti(vin)\tcurrent\n\n",
+  "header": "Title: basic rlc circuit \nDate: Sat Mar  8 03:25:53  2025\nCommand: ngspice-44.2, Build Tue Mar  4 21:42:17 UTC 2025\nPlotname: Transient Analysis\nFlags: real\nNo. Variables: 8\nNo. Points: 643\nVariables:\n\t0\ttime\ttime\n\t1\tv(1)\tvoltage\n\t2\tv(2)\tvoltage\n\t3\ti(l)\tcurrent\n\t4\tv(m1#gate)\tvoltage\n\t5\tv(vdd)\tvoltage\n\t6\ti(vdd)\tcurrent\n\t7\ti(vin)\tcurrent\n\n",
   "numVariables": 8,
+  "variableNames": [
+    "time",
+    "v(1)",
+    "v(2)",
+    "i(l)",
+    "v(m1#gate)",
+    "v(vdd)",
+    "i(vdd)",
+    "i(vin)"
+  ],
   "numPoints": 643,
   "dataType": "real",
   "data": [

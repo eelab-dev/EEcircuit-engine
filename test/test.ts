@@ -1,6 +1,7 @@
 import { Simulation } from "../src/simulationLink.ts";
 import { bsimTrans } from "../src/circuits.ts";
 import { readFileSync, writeFileSync } from "node:fs";
+import { deepCompare } from "./compare.ts";
 
 export const sim = new Simulation();
 
@@ -14,37 +15,68 @@ const result = await sim.getResult();
 
 console.log(result.header);
 
-const data = result.data;
-
 writeFileSync("./result.json", JSON.stringify(result, null, 2));
+
+if (result.numVariables !== result.data.length) {
+  console.error(
+    `mismatch in numVariables and length of data array -> ${result.numVariables} vs ${result.data.length}`
+  );
+  process.exit(1);
+}
+
+result.data.forEach((e) => {
+  if (result.numPoints !== e.values.length) {
+    console.error(
+      `mismatch in numPoints and length of values array -> ${result.numPoints} vs ${e.values.length}`
+    );
+    process.exit(1);
+  }
+});
 
 const refData = JSON.parse(
   readFileSync("./test/ref-result.json", "utf-8")
-) as typeof data;
+) as typeof result;
 
-function deepCompare(a: any, b: any, path: string[] = []): void {
-  if (
-    typeof a !== "object" ||
-    typeof b !== "object" ||
-    a === null ||
-    b === null
-  ) {
-    if (a !== b) {
-      console.error(`Difference at ${path.join(".")}:`, a, b);
-    }
-    return;
-  }
-  if (Array.isArray(a) && Array.isArray(b)) {
-    const len = Math.max(a.length, b.length);
-    for (let i = 0; i < len; i++) {
-      deepCompare(a[i], b[i], [...path, String(i)]);
-    }
-  } else {
-    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-    for (const key of keys) {
-      deepCompare(a[key], b[key], [...path, key]);
-    }
-  }
+if (result.numVariables !== refData.numVariables) {
+  console.error(
+    `mismatch in numVariables between result and refData -> ${result.numVariables} vs ${refData.numVariables}`
+  );
+  process.exit(1);
 }
 
-deepCompare(data, refData);
+if (result.numPoints !== refData.numPoints) {
+  console.error(
+    `mismatch in numPoints between result and refData -> ${result.numPoints} vs ${refData.numPoints}`
+  );
+  process.exit(1);
+}
+
+result.data.forEach((e, i) => {
+  if (e.name !== refData.data[i].name) {
+    console.error(
+      `mismatch in name between result and refData -> item ${i}: '${e.name}' vs '${refData.data[i].name}'`
+    );
+    process.exit(1);
+  }
+  if (e.type !== refData.data[i].type) {
+    console.error(
+      `mismatch in type between result and refData -> item ${i}: '${e.type}' vs '${refData.data[i].type}'`
+    );
+    process.exit(1);
+  }
+  if (e.values.length !== refData.data[i].values.length) {
+    console.error(
+      `mismatch in values length between result and refData -> item ${i}: ${e.values.length} vs ${refData.data[i].values.length}`
+    );
+    process.exit(1);
+  }
+});
+
+const match = deepCompare(result.data, refData.data);
+
+if (!match) {
+  console.error("mismatch in data between result and refData");
+  process.exit(1);
+}
+
+console.log("All tests passed");
