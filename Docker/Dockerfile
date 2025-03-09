@@ -1,5 +1,8 @@
 FROM ubuntu:latest
 
+# Default version is master
+ENV VERSION=master  
+
 RUN apt-get update && apt-get install -y \
   build-essential \
   cmake \
@@ -30,7 +33,8 @@ RUN chmod +x /run.sh
 ENTRYPOINT ["/run.sh"]
 
 ## run this command in WSL2:
-## docker run -it -v $(realpath .):/mnt ngspice:emcc
+## docker run -it -e VERSION=next -v $(realpath .):/mnt ngspice:emcc
+
 
 
 
