@@ -69,7 +69,7 @@ fs.readFile(filename, "utf8", function (err, data) {
   for (let i = 0; i < textAll.length; i++) {
     const resultNew = result.replace(textAll[i], "//EEsim\n" + textAllrep[i]);
     if (result === resultNew) {
-      console.error(`Couldn't find the phrase:\n${textAll[i]}\n\nPlease investigate`);
+      console.error(`build: patcher couldn't find the phrase:\n${textAll[i]}\n\nPlease investigate`);
       process.exit(1);  // Exit with code 1 if a phrase cannot be found and replaced
     }
     result = resultNew;
@@ -84,5 +84,5 @@ fs.readFile(filename, "utf8", function (err, data) {
     }
   });
 
-  console.log(`Successfully applied EEsim patches!`);
+  console.log(`build: Successfully applied EEsim patches!`);
 });

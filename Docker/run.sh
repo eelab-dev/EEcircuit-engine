@@ -1,12 +1,12 @@
 #!/bin/bash
-echo Entryponit script is Running...
+echo "build: Entryponit script is Running..."
 
-echo Installing emscripten...
+echo "build: Installing emscripten..."
 
 NGSPICE_HOME="https://github.com/danchitnis/ngspice-sf-mirror"
 #NGSPICE_HOME="https://git.code.sf.net/p/ngspice/ngspice"
 
-echo -e "Ngsice git repository is $NGSPICE_HOME\n"
+echo "build: ngsice git repository is $NGSPICE_HOME"
 
 cd /opt
 git clone https://github.com/emscripten-core/emsdk.git
@@ -15,12 +15,12 @@ cd emsdk
 ./emsdk activate latest
 source ./emsdk_env.sh
 
-echo emscripten is installed
+echo "build: emscripten is installed"
 
 ############################################
 
 echo -e "\n"
-echo cloning ngspice repository...
+echo "build: cloning ngspice repository..."
 
 cd /opt
 git clone $NGSPICE_HOME ngspice-ngspice
@@ -29,16 +29,16 @@ cd ngspice-ngspice
 ############################################
 
 echo -e "\n"
-echo determining the latest release version and branch...
+echo "build: determining the latest release version and branch..."
 
 # Step 1: Find the latest tag with the version format "ngspice-X.Y"
 latest_tag=$(git tag | grep -E '^ngspice-[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
 if [ -z "$latest_tag" ]; then
-  echo "No ngspice tags found."
+  echo "build: No ngspice tags found."
   exit 1
 fi
 latest_version=${latest_tag#ngspice-}  # Extract version number (e.g., 44.2)
-echo "Latest tag: $latest_tag (version $latest_version)"
+echo "build: Latest tag: $latest_tag (version $latest_version)"
 
 # Step 2: Find the branch with a higher version than the latest tag.
 # We assume branch names are in the form "pre-master-X" or "pre-master-X.Y"
@@ -50,28 +50,29 @@ branch_version=$(git branch -r | \
   awk -v latest="$latest_version" '{ if ($1+0 > latest+0) { print $1; exit } }')
 
 if [ -n "$branch_version" ]; then
-  echo "Branch with higher version: pre-master-$branch_version"
+  echo "build: Branch with higher version: pre-master-$branch_version"
 else
-  echo "No branch found with a version higher than $latest_version"
+  echo "build: No branch found with a version higher than $latest_version"
   exit 1
 fi
 
 ############################################
 
 echo -e "\n"
-echo "Running build requested is: $VERSION"
+echo "build: Running build requested is: $VERSION"
 
 if [ "$VERSION" == "next" ]; then
-  echo "Checking out the branch pre-master-$branch_version"
+  echo "build: Checking out the branch pre-master-$branch_version"
   git checkout pre-master-$branch_version
 else
-  echo "Checking out the master branch for version $latest_version"
+  echo "build: Checking out the master branch for version $latest_version"
 fi
 
 ############################################
 
 echo -e "\n"
-echo "Applying patches..."
+echo "build: Applying patches..."
+echo "build: Branch name is $(git branch --show-current)"
 
 
 #https://www.cyberciti.biz/faq/how-to-use-sed-to-find-and-replace-text-in-files-in-linux-unix-shell/
@@ -85,7 +86,7 @@ sed -i 's|freewl = wlist = getcommand(string);|emscripten_sleep(100);\n\n\t\tfre
 ############################################
 
 echo -e "\n"
-echo "Building ngspice..."
+echo "build: Building ngspice..."
 
 ./autogen.sh
 mkdir release
@@ -106,19 +107,19 @@ wait
 ############################################
 
 echo -e "\n"
-echo "Copying the build artifacts..."
+echo "build: Copying the build artifacts..."
 
 cd src
 mv spice.mjs spice.js
 mkdir -p /mnt/build
 \cp spice.js spice.wasm /mnt/build
 
-echo "Build artifacts are copied to /mnt/build"
+echo "build: Build artifacts are copied to /mnt/build"
 
 ############################################
 
 echo -e "\n"
-echo -e "This script is ended\n"
+echo -e "build: Docker script is ended\n"
 
 
 

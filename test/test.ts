@@ -15,7 +15,9 @@ const result = await sim.getResult();
 
 console.log(result.header);
 
-writeFileSync("./result.json", JSON.stringify(result, null, 2));
+
+// only enable when collecting new reference data
+//writeFileSync("./result.json", JSON.stringify(result, null, 2));
 
 if (result.numVariables !== result.data.length) {
   console.error(
