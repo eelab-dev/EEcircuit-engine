@@ -1,8 +1,17 @@
 #!/bin/bash
 
+# Check if the first argument is 'next'
+if [ "$1" == "next" ]; then
+    VERSION="next"
+    echo "Selected version: next (building next version)"
+else
+    VERSION=""
+    echo "Selected version: current (building current version)"
+fi
+
 docker build --no-cache -t eecircuit ./Docker
 
-docker run -t -e VERSION=next -v $(realpath ./Docker):/mnt eecircuit
+docker run -t -e VERSION=$VERSION -v $(realpath ./Docker):/mnt eecircuit
 
 node ./Docker/inject.mjs 
 
