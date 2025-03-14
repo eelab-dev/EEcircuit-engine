@@ -47,7 +47,9 @@ var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions 
 // we collect those properties and reapply _after_ we configure
 // the current environment's defaults to avoid having to be so
 // defensive during initialization.
-var moduleOverrides = Object.assign({}, Module);
+var moduleOverrides = {
+  ...Module
+};
 
 var arguments_ = [];
 
@@ -425,8 +427,8 @@ async function createWasm() {
   }
 }
 
-// === Body ===
 // end include: preamble.js
+// Begin JS library code
 class ExitStatus {
   name="ExitStatus";
   constructor(status) {
@@ -979,7 +981,6 @@ var MEMFS = {
           llseek: MEMFS.stream_ops.llseek,
           read: MEMFS.stream_ops.read,
           write: MEMFS.stream_ops.write,
-          allocate: MEMFS.stream_ops.allocate,
           mmap: MEMFS.stream_ops.mmap,
           msync: MEMFS.stream_ops.msync
         }
@@ -1226,10 +1227,6 @@ var MEMFS = {
         throw new FS.ErrnoError(28);
       }
       return position;
-    },
-    allocate(stream, offset, length) {
-      MEMFS.expandFileStorage(stream.node, offset + length);
-      stream.node.usedBytes = Math.max(stream.node.usedBytes, offset + length);
     },
     mmap(stream, length, position, prot, flags) {
       if (!FS.isFile(stream.node.mode)) {
@@ -1934,9 +1931,9 @@ var FS = {
   mkdirTree(path, mode) {
     var dirs = path.split("/");
     var d = "";
-    for (var i = 0; i < dirs.length; ++i) {
-      if (!dirs[i]) continue;
-      d += "/" + dirs[i];
+    for (var dir of dirs) {
+      if (!dir) continue;
+      d += "/" + dir;
       try {
         FS.mkdir(d, mode);
       } catch (e) {
@@ -2429,24 +2426,6 @@ var FS = {
     if (!seeking) stream.position += bytesWritten;
     return bytesWritten;
   },
-  allocate(stream, offset, length) {
-    if (FS.isClosed(stream)) {
-      throw new FS.ErrnoError(8);
-    }
-    if (offset < 0 || length <= 0) {
-      throw new FS.ErrnoError(28);
-    }
-    if ((stream.flags & 2097155) === 0) {
-      throw new FS.ErrnoError(8);
-    }
-    if (!FS.isFile(stream.node.mode) && !FS.isDir(stream.node.mode)) {
-      throw new FS.ErrnoError(43);
-    }
-    if (!stream.stream_ops.allocate) {
-      throw new FS.ErrnoError(138);
-    }
-    stream.stream_ops.allocate(stream, offset, length);
-  },
   mmap(stream, length, position, prot, flags) {
     // User requests writing to file (prot & PROT_WRITE != 0).
     // Checking if we have permissions to write to the file unless
@@ -2658,12 +2637,10 @@ var FS = {
     FS.initialized = false;
     // force-flush all streams, so we get musl std streams printed out
     // close all of our streams
-    for (var i = 0; i < FS.streams.length; i++) {
-      var stream = FS.streams[i];
-      if (!stream) {
-        continue;
+    for (var stream of FS.streams) {
+      if (stream) {
+        FS.close(stream);
       }
-      FS.close(stream);
     }
   },
   findObject(path, dontResolveLastLink) {
@@ -3450,12 +3427,9 @@ var PIPEFS = {
       if ((stream.flags & 2097155) === 1) {
         return (256 | 4);
       }
-      if (pipe.buckets.length > 0) {
-        for (var i = 0; i < pipe.buckets.length; i++) {
-          var bucket = pipe.buckets[i];
-          if (bucket.offset - bucket.roffset > 0) {
-            return (64 | 1);
-          }
+      for (var bucket of pipe.buckets) {
+        if (bucket.offset - bucket.roffset > 0) {
+          return (64 | 1);
         }
       }
       return 0;
@@ -3472,8 +3446,7 @@ var PIPEFS = {
     read(stream, buffer, offset, length, position) {
       var pipe = stream.node.pipe;
       var currentLength = 0;
-      for (var i = 0; i < pipe.buckets.length; i++) {
-        var bucket = pipe.buckets[i];
+      for (var bucket of pipe.buckets) {
         currentLength += bucket.offset - bucket.roffset;
       }
       var data = buffer.subarray(offset, offset + length);
@@ -3487,21 +3460,20 @@ var PIPEFS = {
       var toRead = Math.min(currentLength, length);
       var totalRead = toRead;
       var toRemove = 0;
-      for (var i = 0; i < pipe.buckets.length; i++) {
-        var currBucket = pipe.buckets[i];
-        var bucketSize = currBucket.offset - currBucket.roffset;
+      for (var bucket of pipe.buckets) {
+        var bucketSize = bucket.offset - bucket.roffset;
         if (toRead <= bucketSize) {
-          var tmpSlice = currBucket.buffer.subarray(currBucket.roffset, currBucket.offset);
+          var tmpSlice = bucket.buffer.subarray(bucket.roffset, bucket.offset);
           if (toRead < bucketSize) {
             tmpSlice = tmpSlice.subarray(0, toRead);
-            currBucket.roffset += toRead;
+            bucket.roffset += toRead;
           } else {
             toRemove++;
           }
           data.set(tmpSlice);
           break;
         } else {
-          var tmpSlice = currBucket.buffer.subarray(currBucket.roffset, currBucket.offset);
+          var tmpSlice = bucket.buffer.subarray(bucket.roffset, bucket.offset);
           data.set(tmpSlice);
           data = data.subarray(tmpSlice.byteLength);
           toRead -= tmpSlice.byteLength;
@@ -4327,6 +4299,7 @@ MEMFS.doesNotExistError = new FS.ErrnoError(44);
 
 /** @suppress {checkTypes} */ MEMFS.doesNotExistError.stack = "<generic error, no stack>";
 
+// End JS library code
 var wasmImports = {
   /** @export */ __assert_fail: ___assert_fail,
   /** @export */ __call_sighandler: ___call_sighandler,
