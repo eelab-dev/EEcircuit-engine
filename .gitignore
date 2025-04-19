@@ -132,4 +132,7 @@ dist
 build
 
 .DS_Store
+
+spice.js
+*.wasm
 temp
