@@ -1608,22 +1608,30 @@ export const ptm = `
 
 * Predictive Technology Model Beta Version
 * 180nm NMOS SPICE Parametersv (normal one)
-*
 
-.model PTM180N NMOS
-+Level = 49
+.model PTM180N nmos level = 49
 
-+Lint = 4.e-08 Tox = 4.e-09 
-+Vth0 = 0.3999 Rdsw = 250 
++version = 3.1
 
-+lmin=1.8e-7 lmax=1.8e-7 wmin=1.8e-7 wmax=1.0e-4 Tref=27.0 version =3.1
++Lint = 4.e-08  Tox = 4.e-09 
++Vth0 = 0.3999  Rdsw = 250 
+
++lmin=1.8e-7 lmax=1.8e-7
++wmin=1.8e-7 wmax=1.0e-4
+
+*+Tref=27.0
+
 +Xj= 6.0000000E-08         Nch= 5.9500000E+17 
 +lln= 1.0000000            lwn= 1.0000000              wln= 0.00
 +wwn= 0.00                 ll= 0.00
 +lw= 0.00                  lwl= 0.00                   wint= 0.00
 +wl= 0.00                  ww= 0.00                    wwl= 0.00
-+Mobmod=  1                binunit= 2                  xl=  0
-+xw=  0                    binflag=  0
++Mobmod=  1                binunit= 2                  
+
+*+xl=  0
+*+xw=  0                    
+*+binflag=  0
+
 +Dwg= 0.00                 Dwb= 0.00 
 
 +K1= 0.5613000               K2= 1.0000000E-02 
@@ -1653,10 +1661,19 @@ export const ptm = `
 +Uc1= 0.00                 Kt1l= 4.0000000E-09         Prt= 0.00 
 
 +Cj= 0.00365               Mj= 0.54                    Pb= 0.982
-+Cjsw= 7.9E-10             Mjsw= 0.31                  Php= 0.841
-+Cta= 0                    Ctp= 0                      Pta= 0
-+Ptp= 0                    JS=1.50E-08                 JSW=2.50E-13
-+N=1.0                     Xti=3.0                     Cgdo=2.786E-10
++Cjsw= 7.9E-10             Mjsw= 0.31                  
+
+*+Php= 0.841
+*+Cta= 0                    
+*+Ctp= 0                      
+*+Pta= 0
+*+Ptp= 0                    
+
++JS=1.50E-08                 JSW=2.50E-13
+
+*+N=1.0                     
+
++Xti=3.0                     Cgdo=2.786E-10
 +Cgso=2.786E-10            Cgbo=0.0E+00                Capmod= 2
 +NQSMOD= 0                 Elm= 5                      Xpart= 1
 +Cgsl= 1.6E-10             Cgdl= 1.6E-10               Ckappa= 2.886
@@ -1671,25 +1688,40 @@ export const ptm = `
 * 180nm PMOS SPICE Parametersv (normal one)
 *
 
-.model PTM180P PMOS
-+Level = 49
+.model PTM180P pmos level = 49
+
++version =3.1
 
 +Lint = 3.e-08 Tox = 4.2e-09 
 +Vth0 = -0.42 Rdsw = 450 
 
-+lmin=1.8e-7 lmax=1.8e-7 wmin=1.8e-7 wmax=1.0e-4 Tref=27.0 version =3.1
++lmin=1.8e-7 lmax=1.8e-7 wmin=1.8e-7 wmax=1.0e-4 
+
+*+Tref=27.0 
+
 +Xj= 7.0000000E-08         Nch= 5.9200000E+17 
 +lln= 1.0000000            lwn= 1.0000000              wln= 0.00
 +wwn= 0.00                 ll= 0.00
 +lw= 0.00                  lwl= 0.00                   wint= 0.00
 +wl= 0.00                  ww= 0.00                    wwl= 0.00
-+Mobmod=  1                binunit= 2                  xl= 0.00
-+xw= 0.00                  
-+binflag=  0               Dwg= 0.00                   Dwb= 0.00 
++Mobmod=  1                binunit= 2                  
 
-+ACM= 0                    ldif=0.00                   hdif=0.00
-+rsh= 0                    rd= 0                       rs= 0
-+rsc= 0                    rdc= 0
+*+xl= 0.00
+*+xw= 0.00                  
+*+binflag=  0               
+
++Dwg= 0.00                   Dwb= 0.00 
+
+*+ACM= 0                    
+*+ldif=0.00                   
+
++hdif=0.00
+
+*+rsh= 0                    
+*+rd= 0                       
+*+rs= 0
+*+rsc= 0                    
+*+rdc= 0
 
 +K1= 0.5560000             K2= 0.00 
 +K3= 0.00                  Dvt0= 11.2000000            Dvt1= 0.7200000 
@@ -1718,10 +1750,19 @@ export const ptm = `
 +Uc1= 0.00                 Kt1l= 4.0000000E-09         Prt= 0.00 
 
 +Cj= 0.00138               Mj= 1.05                    Pb= 1.24
-+Cjsw= 1.44E-09            Mjsw= 0.43                  Php= 0.841
-+Cta= 0.00093              Ctp= 0                      Pta= 0.00153
-+Ptp= 0                    JS=1.50E-08                 JSW=2.50E-13
-+N=1.0                     Xti=3.0                     Cgdo=2.786E-10
++Cjsw= 1.44E-09            Mjsw= 0.43                  
+
+*+Php= 0.841
+*+Cta= 0.00093              
+*+Ctp= 0                      
+*+Pta= 0.00153
+*+Ptp= 0                    
+
++JS=1.50E-08                 JSW=2.50E-13
+
+*+N=1.0                     
+
++Xti=3.0                     Cgdo=2.786E-10
 +Cgso=2.786E-10            Cgbo=0.0E+00                Capmod= 2
 +NQSMOD= 0                 Elm= 5                      Xpart= 1
 +Cgsl= 1.6E-10             Cgdl= 1.6E-10               Ckappa= 2.886
