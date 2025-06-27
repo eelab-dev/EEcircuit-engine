@@ -135,3 +135,4 @@ build
 
 spice.js
 *.wasm
+temp
