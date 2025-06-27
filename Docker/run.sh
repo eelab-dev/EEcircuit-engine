@@ -65,7 +65,7 @@ echo "build: Running build requested is: $VERSION"
 
 if [ "$VERSION" == "next" ]; then
   echo "build: Checking out the branch pre-master-$branch_version"
-  git checkout hv_cppduals_new
+  git checkout "pre-master-$branch_version" || { echo "build: Checkout failed, stopping execution"; exit 1; }
   cp /hicum2_patch.sh ./hicum2_patch.sh
   ./hicum2_patch.sh || { echo "build: hicum2 patch failed, stopping execution"; exit 1; }
 
