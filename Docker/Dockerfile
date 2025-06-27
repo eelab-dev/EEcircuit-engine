@@ -27,7 +27,10 @@ RUN apt-get -y install libtool which
 # COPY ./misc_time.c /opt/misc_time.c
 
 COPY ./run.sh /
+COPY ./hicum2_patch.sh /
+
 RUN chmod +x /run.sh
+RUN chmod +x /hicum2_patch.sh
 
 
 ENTRYPOINT ["/run.sh"]
