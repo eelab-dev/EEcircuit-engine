@@ -3,6 +3,7 @@ import { bsimTrans } from "../src/circuits.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { deepCompare } from "./compare.ts";
 
+
 const sim = new Simulation();
 
 await sim.start();
@@ -12,6 +13,10 @@ sim.setNetList(bsimTrans);
 const result = await sim.runSim();
 
 console.log(result.header);
+
+console.log(`numVariables: ${result.numVariables}`);
+console.log(`numPoints: ${result.numPoints}`);
+
 
 // only enable when collecting new reference data
 //writeFileSync("./result.json", JSON.stringify(result, null, 2));
