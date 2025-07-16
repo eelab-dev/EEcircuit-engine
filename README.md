@@ -28,7 +28,7 @@ Set your netlist. The netlist is same as ngspice netlist format.
 
 ```javascript
 const netlist = `
-Basic RLC circuit 
+
 .include modelcard.CMOS90
 
 r vdd 2 100.0
