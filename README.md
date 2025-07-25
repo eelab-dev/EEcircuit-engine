@@ -27,8 +27,7 @@ await sim.start();
 Set your netlist. The netlist is same as ngspice netlist format.
 
 ```javascript
-const netlist = `
-Basic RLC circuit 
+const netlist = `Basic RLC circuit 
 .include modelcard.CMOS90
 
 r vdd 2 100.0
@@ -40,8 +39,7 @@ vdd vdd 0 1.8
 vin 1 0 0 pulse (0 1.8 0 0.1 0.1 15 30)
 .tran 0.1 5
 
-.end
-`;
+.end`;
 
 sim.setNetList(netlist);
 ```
