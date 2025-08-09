@@ -43,7 +43,7 @@ type ParamType = {
 
 type VariableType = {
   name: string;
-  type: "voltage" | "current" | "time" | "notype";
+  type: "voltage" | "current" | "time" | "frequency" | "notype";
 };
 
 export type RealNumber = number;
@@ -116,7 +116,7 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
   }
 }
 
-function ab2str(buf: BufferSource) {
+function ab2str(buf: Uint8Array) {
   return new TextDecoder("utf-8").decode(buf);
 }
 
@@ -160,7 +160,7 @@ function findParams(header: string): ParamType {
     log("str2->", str2);
     varList.push({
       name: str2[1], // Variable name is the 2nd non-empty column
-      type: str2[2] as "voltage" | "current" | "time" | "notype", // Variable type is the 3rd non-empty column
+      type: str2[2] as VariableType["type"], // Variable type is the 3rd non-empty column
     });
   }
   //log("varlist->", varList);
@@ -184,7 +184,7 @@ export function readOutput(output: Uint8Array): ResultType {
   const data = rawResult.data;
 
   if (param.dataType === "complex") {
-    // Filter to only include voltage, current, and time variables
+    // Filter to only include voltage, current, and time and frequency variables
     const filteredData = (data as ComplexNumber[][])
       .map((values, i) => ({
         name: param.variables[i].name,
@@ -192,7 +192,7 @@ export function readOutput(output: Uint8Array): ResultType {
         values: values,
         index: i
       }))
-      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time");
+      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time" || item.type === "frequency");
 
     return {
       header: header,
@@ -207,7 +207,7 @@ export function readOutput(output: Uint8Array): ResultType {
       })),
     };
   } else {
-    // Filter to only include voltage, current, and time variables
+    // Filter to only include voltage, current, and time and frequency variables
     const filteredData = (data as number[][])
       .map((values, i) => ({
         name: param.variables[i].name,
@@ -215,7 +215,7 @@ export function readOutput(output: Uint8Array): ResultType {
         values: values,
         index: i
       }))
-      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time");
+      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time" || item.type === "frequency");
 
     return {
       header: header,
