@@ -2,31 +2,40 @@
  * Read output from spice
  */
 
-export type RealDataType = { name: string; type: string; values: RealNumber[] };
+export type VariableType = {
+  name: string;
+  type: "voltage" | "current" | "time" | "frequency" | "notype";
+};
+
+export type RealDataType = {
+  name: string;
+  type: VariableType["type"];
+  values: RealNumber[];
+};
 
 export type ComplexDataType = {
   name: string;
-  type: string;
+  type: VariableType["type"];
   values: ComplexNumber[];
 };
 
 export type ResultType =
   | {
-      header: string;
-      numVariables: number;
-      variableNames: string[];
-      numPoints: number;
-      dataType: "real";
-      data: RealDataType[];
-    }
+    header: string;
+    numVariables: number;
+    variableNames: string[];
+    numPoints: number;
+    dataType: "real";
+    data: RealDataType[];
+  }
   | {
-      header: string;
-      numVariables: number;
-      variableNames: string[];
-      numPoints: number;
-      dataType: "complex";
-      data: ComplexDataType[];
-    };
+    header: string;
+    numVariables: number;
+    variableNames: string[];
+    numPoints: number;
+    dataType: "complex";
+    data: ComplexDataType[];
+  };
 
 type RawResultType = {
   param: ParamType;
@@ -39,11 +48,6 @@ type ParamType = {
   pointNum: number;
   variables: VariableType[];
   dataType: "real" | "complex";
-};
-
-type VariableType = {
-  name: string;
-  type: "voltage" | "current" | "time" | "frequency" | "notype";
 };
 
 export type RealNumber = number;
@@ -156,7 +160,7 @@ function findParams(header: string): ParamType {
   const varList: VariableType[] = [] as VariableType[];
   for (let i = 0; i < varNum; i++) {
     const str = lines[i + lines.indexOf("Variables:") + 1];
-    const str2 = str.split(/\s+/).filter(s => s.length > 0); // Filter out empty strings
+    const str2 = str.split(/\s+/).filter((s) => s.length > 0); // Filter out empty strings
     log("str2->", str2);
     varList.push({
       name: str2[1], // Variable name is the 2nd non-empty column
@@ -190,17 +194,17 @@ export function readOutput(output: Uint8Array): ResultType {
         name: param.variables[i].name,
         type: param.variables[i].type,
         values: values,
-        index: i
+        index: i,
       }))
-      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time" || item.type === "frequency");
+      .filter((item) => item.type !== "notype");
 
     return {
       header: header,
       numVariables: filteredData.length,
-      variableNames: filteredData.map(e => e.name),
+      variableNames: filteredData.map((e) => e.name),
       numPoints: param.pointNum,
       dataType: "complex",
-      data: filteredData.map(e => ({
+      data: filteredData.map((e) => ({
         name: e.name,
         type: e.type,
         values: e.values,
@@ -213,17 +217,17 @@ export function readOutput(output: Uint8Array): ResultType {
         name: param.variables[i].name,
         type: param.variables[i].type,
         values: values,
-        index: i
+        index: i,
       }))
-      .filter(item => item.type === "voltage" || item.type === "current" || item.type === "time" || item.type === "frequency");
+      .filter((item) => item.type !== "notype");
 
     return {
       header: header,
       numVariables: filteredData.length,
-      variableNames: filteredData.map(e => e.name),
+      variableNames: filteredData.map((e) => e.name),
       numPoints: param.pointNum,
       dataType: "real",
-      data: filteredData.map(e => ({
+      data: filteredData.map((e) => ({
         name: e.name,
         type: e.type,
         values: e.values,
