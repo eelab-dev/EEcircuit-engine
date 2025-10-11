@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Browser Simulation Regression</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 1rem;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>Browser Simulation Regression</h1>
+  <pre id="log">Booting browser-based regression...
+</pre>
+  <script type="module">
+    const logElement = document.getElementById("log");
+
+    // Expose test hooks for Playwright
+    window.__testDone = false;
+    window.__testError = null;
+    window.__testResult = null;
+
+    const log = (message) => {
+      if (logElement) {
+        logElement.textContent += message + "\n";
+      }
+      console.log(message);
+    };
+
+    const transientRegressionNetlist = `Basic RLC circuit 
+.include modelcard.CMOS90
+
+r vdd 2 100.0
+l vdd 2 1
+c vdd 2 0.01
+m1 2 1 0 0 N90 W=100.0u L=0.09u
+vdd vdd 0 1.8
+
+vin 1 0 0 pulse (0 1.8 0 0.1 0.1 15 30)
+.tran 0.1 50
+
+.end
+`;
+
+    const assert = (condition, message) => {
+      if (!condition) {
+        throw new Error(message);
+      }
+    };
+
+    const deepCompare = (a, b) => {
+      if (
+        typeof a !== "object" ||
+        typeof b !== "object" ||
+        a === null ||
+        b === null
+      ) {
+        return a === b;
+      }
+
+      if (Array.isArray(a) && Array.isArray(b)) {
+        const len = Math.max(a.length, b.length);
+        for (let i = 0; i < len; i++) {
+          if (!deepCompare(a[i], b[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+      for (const key of keys) {
+        if (!deepCompare(a[key], b[key])) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    async function runBrowserRegressionSuite() {
+      try {
+        const module = await import("../dist/eecircuit-engine.mjs");
+        const Simulation = module?.Simulation;
+
+        if (typeof Simulation !== "function") {
+          throw new Error("Simulation export is not available");
+        }
+
+  const sim = new Simulation();
+  await sim.start();
+
+  log("Fetching reference regression data...");
+        const refResponse = await fetch("./ref-result.json");
+        assert(refResponse.ok, `Failed to fetch ref-result.json: ${refResponse.status}`);
+        const refData = await refResponse.json();
+
+  log("Running transient regression inside the browser...");
+        sim.setNetList(transientRegressionNetlist);
+        const transientRegressionResult = await sim.runSim();
+        log(transientRegressionResult.header);
+
+        assert(
+          transientRegressionResult.numVariables === transientRegressionResult.data.length,
+          "Mismatch between numVariables and data array length in transient result"
+        );
+
+        for (const entry of transientRegressionResult.data) {
+          assert(
+            entry.values.length === transientRegressionResult.numPoints,
+            `Mismatch in data length for ${entry.name}`
+          );
+        }
+
+        assert(
+          transientRegressionResult.numVariables === refData.numVariables,
+          "Transient regression numVariables differ from reference"
+        );
+        assert(
+          transientRegressionResult.numPoints === refData.numPoints,
+          "Transient regression numPoints differ from reference"
+        );
+
+        transientRegressionResult.data.forEach((entry, index) => {
+          const refEntry = refData.data[index];
+          assert(refEntry, `Missing reference entry for index ${index}`);
+          assert(entry.name === refEntry.name, `Name mismatch at index ${index}`);
+          assert(entry.type === refEntry.type, `Type mismatch at index ${index}`);
+          assert(
+            entry.values.length === refEntry.values.length,
+            `Values length mismatch at index ${index}`
+          );
+        });
+
+        const matchesReference = deepCompare(transientRegressionResult.data, refData.data);
+        assert(matchesReference, "Transient regression result does not match reference data");
+
+        window.__testResult = {
+          regression: {
+            header: transientRegressionResult.header,
+            numVariables: transientRegressionResult.numVariables,
+            numPoints: transientRegressionResult.numPoints,
+            dataType: transientRegressionResult.dataType,
+            matchesReference,
+          },
+        };
+
+        log("Browser regression completed successfully.");
+      } catch (error) {
+        const message = error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : String(error);
+        const stack = error && typeof error === "object" && "stack" in error
+          ? String(error.stack)
+          : "";
+        window.__testError = { message, stack };
+        log(`Simulation failed: ${message}`);
+        if (stack) {
+          log(stack);
+        }
+      } finally {
+        window.__testDone = true;
+      }
+    }
+
+    runBrowserRegressionSuite();
+  </script>
+</body>
+</html>

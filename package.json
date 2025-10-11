@@ -19,14 +19,16 @@
     "check": "eslint . --ext .ts",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "npm run build && npm run test:source && npm run test:package",
+    "test": "npm run build && npm run test:source && npm run test:package && npm run test:browser",
     "test:source": "npx tsx test/test.ts",
-    "test:package": "npx tsx test/test-package.ts"
+    "test:package": "npx tsx test/test-package.ts",
+    "test:browser": "npx playwright test test/test-browser-regression.spec.js"
   },
   "author": "Danial Chitnis",
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@playwright/test": "^1.56.0",
     "@types/node": "^24.7.2",
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
