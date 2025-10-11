@@ -3,7 +3,7 @@
 
 const filename = "./Docker/build/spice.js";
 
-const text1 = `if (typeof window != "undefined" && typeof window.prompt == "function")`;
+const text1 = `if (globalThis.window?.prompt)`;
 const text1rep = `
 if (true)
 `;
@@ -61,7 +61,7 @@ import fs from "fs";
 fs.readFile(filename, "utf8", function (err, data) {
   if (err) {
     console.error(err);
-    process.exit(1);  // Exit with code 1 if an error occurs while reading the file
+    process.exit(1); // Exit with code 1 if an error occurs while reading the file
   }
 
   let result = data;
@@ -69,8 +69,10 @@ fs.readFile(filename, "utf8", function (err, data) {
   for (let i = 0; i < textAll.length; i++) {
     const resultNew = result.replace(textAll[i], "//EEsim\n" + textAllrep[i]);
     if (result === resultNew) {
-      console.error(`build: patcher couldn't find the phrase:\n${textAll[i]}\n\nPlease investigate`);
-      process.exit(1);  // Exit with code 1 if a phrase cannot be found and replaced
+      console.error(
+        `build: patcher couldn't find the phrase:\n${textAll[i]}\n\nPlease investigate`
+      );
+      process.exit(1); // Exit with code 1 if a phrase cannot be found and replaced
     }
     result = resultNew;
   }
@@ -80,7 +82,7 @@ fs.readFile(filename, "utf8", function (err, data) {
   fs.writeFile(filenameNew, result, "utf8", function (err) {
     if (err) {
       console.error(err);
-      process.exit(1);  // Exit with code 1 if an error occurs while writing the file
+      process.exit(1); // Exit with code 1 if an error occurs while writing the file
     }
   });
 
