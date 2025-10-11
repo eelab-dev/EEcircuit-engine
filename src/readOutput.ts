@@ -124,14 +124,6 @@ function ab2str(buf: Uint8Array) {
   return new TextDecoder("utf-8").decode(buf);
 }
 
-function findOriginalVarNum(header: string): number {
-  const lines = header.split("\n");
-  return parseInt(
-    lines[lines.findIndex((s) => s.startsWith("No. Variables"))].split(":")[1],
-    10
-  );
-}
-
 function findParams(header: string): ParamType {
   //
 

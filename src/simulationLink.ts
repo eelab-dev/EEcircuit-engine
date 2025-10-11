@@ -45,13 +45,18 @@ export class Simulation {
    * Internal startup method that sets up the Module and simulation loop.
    */
   private async startInternal() {
-    const module = await Module({
+    type ModuleOptions = Parameters<typeof Module>[0] & {
+      locateFile?: (path: string, prefix?: string) => string;
+      wasmBinary?: Uint8Array;
+    };
+
+    const moduleOptions: ModuleOptions = {
       noInitialRun: true,
-      print: (e) => {
+      print: (e: string = "") => {
         this.log_debug(e);
         this.info += e + "\n";
       },
-      printErr: (e) => {
+      printErr: (e: string = "") => {
         this.info += e + "\n\n";
         if (
           e !== "Warning: can't find the initialization file spinit." &&
@@ -71,7 +76,37 @@ export class Simulation {
       runThings: () => {
         /* No-op */
       },
-    });
+    };
+
+    if (typeof process !== "undefined" && process.versions?.node) {
+      // Use a runtime-built dynamic import so bundlers don't see node:* specifiers,
+      // while still letting Node preload the wasm from disk for CLI regression tests.
+      const dynamicImport = new Function(
+        "specifier",
+        "return import(specifier);"
+      ) as <T>(specifier: string) => Promise<T>;
+
+      const [fsModule, urlModule] = await Promise.all([
+        dynamicImport<typeof import("node:fs/promises")>("node:fs/promises").catch(() => null),
+        dynamicImport<typeof import("node:url")>("node:url").catch(() => null),
+      ]);
+
+      if (fsModule && urlModule) {
+        const wasmUrl = new URL("./spice.wasm", import.meta.url);
+
+        if (wasmUrl.protocol === "file:") {
+          // When built for the browser, the bundler inlines the wasm with a data URL,
+          // so only attempt filesystem access when running from an actual file path.
+          const wasmPath = urlModule.fileURLToPath(wasmUrl);
+
+          moduleOptions.locateFile = (path: string) =>
+            path === "spice.wasm" ? wasmPath : path;
+          moduleOptions.wasmBinary = await fsModule.readFile(wasmPath);
+        }
+      }
+    }
+
+    const module = await Module(moduleOptions);
 
     // Write required files
     module.FS?.writeFile("/spinit", "* Standard ngspice init file\n");
