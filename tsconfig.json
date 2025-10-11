@@ -1,5 +1,6 @@
 {
   "include": ["src", "types"],
+  "exclude": ["src/spice.ts", "src/spice.d.ts"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
