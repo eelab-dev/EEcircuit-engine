@@ -51,17 +51,21 @@ jobs:
     
     - name: Install Dependencies
       run: npm install
+
+    - name: Test node (source)
+      run: npm run test:source
     
     - name: Build Project with Vite
       run: npm run build
 
-    - name: Install Deno
-      uses: denoland/setup-deno@v2
-      with:
-        deno-version: v2.x
+    - name: Test node (package)
+      run: npm run test:package
 
-    - name: Test
-      run: deno --allow-read --allow-write ./test/test.ts
+    - name: Install browsers
+      run: npx playwright install
+
+    - name: Test browser
+      run: npm run test:browser
 
     - name: Get the current version and set dynamic next version
       run: |
