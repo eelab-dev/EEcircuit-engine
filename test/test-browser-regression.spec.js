@@ -50,12 +50,22 @@ test("runs the browser regression suite", async ({ page }) => {
 
 async function startStaticServer(rootDir) {
   const resolvedRoot = path.resolve(rootDir);
+  const version = process.env.REF_VERSION || "main";
 
   return await new Promise((resolve) => {
     const server = http.createServer(async (req, res) => {
       try {
         const requestUrl = new URL(req.url || "/", "http://127.0.0.1");
         let relativePath = decodeURIComponent(requestUrl.pathname);
+
+        // Intercept ref-result.json request to serve the correct version
+        if (relativePath.endsWith("/ref-result.json")) {
+          const refPath = path.join(resolvedRoot, "test", `ref-${version}`, "ref-result.json");
+          const data = await fs.readFile(refPath);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(data);
+          return;
+        }
 
         if (relativePath.endsWith("/")) {
           relativePath = path.join(relativePath, "index.html");

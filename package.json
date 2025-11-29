@@ -19,7 +19,7 @@
     "check": "eslint . --ext .ts",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "npm run build && npm run test:source && npm run test:package && npm run test:browser",
+    "test": "npx tsx test/run-all.ts",
     "test:source": "npx tsx test/test.ts",
     "test:package": "npx tsx test/test-package.ts",
     "test:browser": "npx playwright test test/test-browser-regression.spec.js"
