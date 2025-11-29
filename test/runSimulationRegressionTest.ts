@@ -13,7 +13,7 @@ export type SimulationInstance = {
 
 export type SimulationFactory = () => SimulationInstance | Promise<SimulationInstance>;
 
-const refDataPath = join(dirname(fileURLToPath(import.meta.url)), "ref-result.json");
+
 
 let fetchPatched = false;
 
@@ -54,8 +54,10 @@ function ensureFileFetch(): void {
 
 export async function runSimulationRegressionTest(
     createSimulation: SimulationFactory,
-    netList: string
+    netList: string,
+    version: string = "main"
 ): Promise<void> {
+    const refDataPath = join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
     ensureFileFetch();
 
     const sim = await createSimulation();

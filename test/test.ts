@@ -3,7 +3,8 @@ import { bsimTrans } from "../src/circuits.ts";
 import { runSimulationRegressionTest } from "./runSimulationRegressionTest.ts";
 
 async function main(): Promise<void> {
-  await runSimulationRegressionTest(() => new Simulation(), bsimTrans);
+  const version = process.argv[2];
+  await runSimulationRegressionTest(() => new Simulation(), bsimTrans, version);
 }
 
 main().catch((error) => {
