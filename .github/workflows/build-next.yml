@@ -65,7 +65,9 @@ jobs:
       run: npx playwright install
 
     - name: Test browser
-      run: npm run test:browser -- next
+      run: npm run test:browser
+      env:
+        REF_VERSION: next
 
     - name: Get the current version and set dynamic next version
       run: |
