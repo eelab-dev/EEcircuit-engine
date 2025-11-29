@@ -17,7 +17,7 @@ export type SimulationFactory = () => SimulationInstance | Promise<SimulationIns
 
 let fetchPatched = false;
 
-function ensureFileFetch(): void {
+export function ensureFileFetch(): void {
     if (fetchPatched) {
         return;
     }
@@ -52,12 +52,10 @@ function ensureFileFetch(): void {
     fetchPatched = true;
 }
 
-export async function runSimulationRegressionTest(
+export async function runSimulation(
     createSimulation: SimulationFactory,
-    netList: string,
-    version: string = "main"
-): Promise<void> {
-    const refDataPath = join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
+    netList: string
+): Promise<ResultType> {
     ensureFileFetch();
 
     const sim = await createSimulation();
@@ -65,7 +63,17 @@ export async function runSimulationRegressionTest(
     await sim.start();
     sim.setNetList(netList);
 
-    const result = await sim.runSim();
+    return await sim.runSim();
+}
+
+export async function runSimulationRegressionTest(
+    createSimulation: SimulationFactory,
+    netList: string,
+    version: string = "main"
+): Promise<void> {
+    const refDataPath = join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
+
+    const result = await runSimulation(createSimulation, netList);
 
     console.log(result.header);
     console.log(`numVariables: ${result.numVariables}`);
