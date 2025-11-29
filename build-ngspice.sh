@@ -1,13 +1,20 @@
 #!/bin/bash
 
-# Check if the first argument is 'next'
+# Check argument for version
 if [ "$1" == "next" ]; then
     VERSION="next"
     echo "Selected version: next (building next version)"
-else
+elif [ "$1" == "main" ] || [ -z "$1" ]; then
     VERSION=""
-    echo "Selected version: current (building current version)"
+    echo "Selected version: main (building main version)"
+else
+    echo "Error: Invalid version argument '$1'. Supported: 'main' (default), 'next'."
+    exit 1
 fi
+
+# Ensure build directory exists and is empty
+rm -rf ./Docker/build
+mkdir -p ./Docker/build
 
 docker build --no-cache -t eecircuit ./Docker
 #docker build -t eecircuit ./Docker || exit 1
