@@ -65,7 +65,9 @@ jobs:
       run: npx playwright install
 
     - name: Test browser
-      run: npm run test:browser -- main
+      run: npm run test:browser
+      env:
+        REF_VERSION: main
 
 
 
