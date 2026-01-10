@@ -11,9 +11,24 @@ import Module from "./spice.js";
 import { readOutput, ResultType } from "./readOutput.ts";
 
 export class Simulation {
+  // Internal instrumentation: count how many times the WASM module is instantiated.
+  // This should be 1 for a given Simulation instance lifetime.
+  private wasmModuleInitCount = 0;
+
+  // Internal instrumentation: count how many completed simulation runs occurred.
+  private completedRunCount = 0;
+
+  public __getWasmInitCountForTests(): number {
+    return this.wasmModuleInitCount;
+  }
+
+  public __getCompletedRunCountForTests(): number {
+    return this.completedRunCount;
+  }
+
   private pass = false;
   // private commandList = [" ", "source test.cir", "run", "set filetype=ascii", "write out.raw"];
-  private commandList = [" ", "source test.cir", "run", "write out.raw"];
+  private commandList = [" ", "source test.cir", "destroy all", "run", "write out.raw"];
   private cmd = 0;
   private dataRaw: Uint8Array = new Uint8Array();
   private results: ResultType = {} as ResultType;
@@ -23,11 +38,21 @@ export class Simulation {
   private error: string[] = [];
   private initialized = false;
 
+  // Keep the wasm Module alive for the lifetime of this Simulation instance.
+  // This prevents per-run re-instantiation/reload when the parent app reuses the object.
+  private spiceModule: Awaited<ReturnType<typeof Module>> | null = null;
+
+  // Ensure start() is idempotent and does not create multiple wasm instances.
+  private startPromise: Promise<void> | null = null;
+
   private netList = "";
 
   // Promise resolvers for initialization and simulation run.
   private initPromiseResolve: (() => void) | null = null;
   private runPromiseResolve: ((result: ResultType) => void) | null = null;
+
+  // Promise resolver used to resume the internal simulation loop between runs.
+  private continuePromiseResolve: (() => void) | null = null;
 
   private getInput = (): string => {
     let strCmd = " ";
@@ -106,7 +131,14 @@ export class Simulation {
       }
     }
 
-    const module = await Module(moduleOptions);
+    // If startInternal is ever called twice, reuse the already created module.
+    // (start() is also guarded, but this keeps things extra safe.)
+    let module = this.spiceModule;
+    if (!module) {
+      this.wasmModuleInitCount++;
+      module = await Module(moduleOptions);
+      this.spiceModule = module;
+    }
 
     // Write required files
     module.FS?.writeFile("/spinit", "* Standard ngspice init file\n");
@@ -128,6 +160,7 @@ export class Simulation {
           try {
             this.dataRaw = module.FS?.readFile("out.raw") ?? new Uint8Array();
             this.results = readOutput(this.dataRaw);
+            this.completedRunCount++;
             this.outputEvent(this.output); // external callback
             // Resolve the run promise with the results.
             if (this.runPromiseResolve) {
@@ -155,11 +188,10 @@ export class Simulation {
         if (this.cmd === 0) {
           this.log_debug("waiting for next simulation trigger...");
           await this.waitForNextRun();
+          // Prepare for the next cycle by writing the new netlist *before* commands restart.
+          module.FS?.writeFile("/test.cir", this.netList);
         }
         this.log_debug("Simulation loop finished for one run cycle");
-
-        // Prepare for the next cycle by writing the new netlist.
-        module.FS?.writeFile("/test.cir", this.netList);
 
         this.pass = false;
       });
@@ -174,29 +206,46 @@ export class Simulation {
    * Returns a promise that resolves when the simulation module is initialized.
    */
   public start = (): Promise<void> => {
-    const initPromise = new Promise<void>((resolve) => {
+    if (this.initialized) {
+      return Promise.resolve();
+    }
+    if (this.startPromise) {
+      return this.startPromise;
+    }
+
+    this.startPromise = new Promise<void>((resolve) => {
       this.initPromiseResolve = resolve;
     });
-    this.startInternal();
-    return initPromise;
+
+    void this.startInternal();
+    return this.startPromise;
   };
 
   /**
    * Triggers a simulation run and returns a promise that resolves with the results.
    */
   public runSim = (): Promise<ResultType> => {
-    if (this.initialized) {
+    const run = async (): Promise<ResultType> => {
+      // If the parent app forgot to call start(), do it once here.
+      await this.start();
+
       // Reset logs and previous results.
       this.info = "";
       this.error = [];
       this.results = {} as ResultType;
+
+      const resultPromise = new Promise<ResultType>((resolve) => {
+        this.runPromiseResolve = resolve;
+      });
+
       this.log_debug("Triggering simulation run...");
       // Continue the simulation loop if it is waiting.
       this.continueRun();
-    }
-    return new Promise<ResultType>((resolve) => {
-      this.runPromiseResolve = resolve;
-    });
+
+      return await resultPromise;
+    };
+
+    return run();
   };
 
   /**
@@ -204,10 +253,7 @@ export class Simulation {
    */
   private waitForNextRun = (): Promise<void> => {
     return new Promise<void>((resolve) => {
-      this.runPromiseResolve = (() => {
-        // First, resolve with the simulation results.
-        resolve();
-      }) as (result: ResultType) => void;
+      this.continuePromiseResolve = resolve;
     });
   };
 
@@ -216,9 +262,10 @@ export class Simulation {
    */
   private continueRun = (): void => {
     // If there's a waiting promise from waitForNextRun, resolve it.
-    if (this.runPromiseResolve) {
-      this.runPromiseResolve(this.results);
-      this.runPromiseResolve = null;
+    if (this.continuePromiseResolve) {
+      const resolve = this.continuePromiseResolve;
+      this.continuePromiseResolve = null;
+      resolve();
     }
   };
 

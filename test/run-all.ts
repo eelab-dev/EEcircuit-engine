@@ -32,6 +32,10 @@ async function main() {
         console.log("\n--- Testing Source ---");
         await runCommand("npx", ["tsx", "test/test.ts", ...args]);
 
+        // 2.5 Test WASM reuse
+        console.log("\n--- Testing WASM reuse ---");
+        await runCommand("npx", ["tsx", "test/test-wasm-reuse.ts"]);
+
         // 3. Test Package
         console.log("\n--- Testing Package ---");
         await runCommand("npx", ["tsx", "test/test-package.ts", ...args]);
