@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Opamp Benchmark</title>
+</head>
+<body>
+  <h1>Opamp Benchmark</h1>
+  <div id="log"></div>
+  <script type="module">
+    const logElement = document.getElementById("log");
+    const log = (msg) => {
+      console.log(msg);
+      logElement.textContent += msg + "\n";
+    };
+
+    window.__benchmarkDone = false;
+    window.__benchmarkResult = null;
+    window.__benchmarkError = null;
+
+    async function run() {
+      try {
+        const module = await import("../dist/eecircuit-engine.mjs");
+        const Simulation = module.Simulation;
+        const sim = new Simulation();
+        await sim.start();
+
+        const response = await fetch("./opamp.cir");
+        if (!response.ok) throw new Error("Failed to load opamp.cir");
+        const cir = await response.text();
+
+        sim.setNetList(cir);
+
+        log("Starting simulation...");
+        const start = performance.now();
+        await sim.runSim();
+        const end = performance.now();
+        const duration = end - start;
+
+        log(`Simulation completed in ${duration.toFixed(2)}ms`);
+        
+        window.__benchmarkResult = { duration };
+      } catch (err) {
+        window.__benchmarkError = err.toString();
+        log("Error: " + err.toString());
+      } finally {
+        window.__benchmarkDone = true;
+      }
+    }
+
+    run();
+  </script>
+</body>
+</html>
