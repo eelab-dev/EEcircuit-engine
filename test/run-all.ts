@@ -32,6 +32,9 @@ async function main() {
         console.log("\n--- Testing Source ---");
         await runCommand("npx", ["tsx", "test/test.ts", ...args]);
 
+        // 2.3 Run an actual .noise simulation and validate header
+        console.log("\n--- Running .noise simulation ---");
+        await runCommand("npx", ["tsx", "test/test-noise-run.ts"]);
         // 2.5 Test WASM reuse
         console.log("\n--- Testing WASM reuse ---");
         await runCommand("npx", ["tsx", "test/test-wasm-reuse.ts"]);

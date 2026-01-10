@@ -26,9 +26,14 @@ export class Simulation {
     return this.completedRunCount;
   }
 
+  public __getCommandListForTests(): string[] {
+    return [...this.commandList];
+  }
+
   private pass = false;
   // private commandList = [" ", "source test.cir", "run", "set filetype=ascii", "write out.raw"];
   private commandList = [" ", "source test.cir", "destroy all", "run", "write out.raw"];
+  private isNoiseMode = false;
   private cmd = 0;
   private dataRaw: Uint8Array = new Uint8Array();
   private results: ResultType = {} as ResultType;
@@ -276,6 +281,22 @@ export class Simulation {
 
   public setNetList = (input: string): void => {
     this.netList = input;
+
+    const hasNoiseAnalysis = /^\s*\.noise\b/im.test(input);
+    if (hasNoiseAnalysis) {
+      this.commandList = [" ", "source test.cir", "destroy all", "run", "setplot noise1", "write out.raw"];
+      if (!this.isNoiseMode) {
+        this.isNoiseMode = true;
+        console.info(
+          "[EEcircuit-engine] .noise analysis detected; activating noise export mode (setplot noise1 -> write out.raw)."
+        );
+      }
+      return;
+    }
+
+    // Reset to default command list when not running a .noise analysis.
+    this.isNoiseMode = false;
+    this.commandList = [" ", "source test.cir", "destroy all", "run", "write out.raw"];
   };
 
   private setOutputEvent = (outputEvent: (out: string) => void): void => {
