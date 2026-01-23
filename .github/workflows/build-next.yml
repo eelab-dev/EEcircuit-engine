@@ -53,19 +53,21 @@ jobs:
       run: npm install
 
     - name: Test node (source)
-      run: npm run test:source
+      run: npm run test:source -- next
     
     - name: Build Project with Vite
       run: npm run build
 
     - name: Test node (package)
-      run: npm run test:package
+      run: npm run test:package -- next
 
     - name: Install browsers
       run: npx playwright install
 
     - name: Test browser
       run: npm run test:browser
+      env:
+        REF_VERSION: next
 
     - name: Get the current version and set dynamic next version
       run: |

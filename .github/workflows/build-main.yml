@@ -32,7 +32,7 @@ jobs:
       run: docker build --no-cache -t eecircuit ./Docker
 
     - name: Run Docker Container
-      run: docker run -t -v $(realpath ./Docker):/mnt eecircuit
+      run: docker run -t -e VERSION=main -v $(realpath ./Docker):/mnt eecircuit
 
     - name: Run Inject.mjs
       run: node ./Docker/inject.mjs
@@ -53,19 +53,21 @@ jobs:
       run: npm install
 
     - name: Test node (source)
-      run: npm run test:source
+      run: npm run test:source -- main
     
     - name: Build Project with Vite
       run: npm run build
 
     - name: Test node (package)
-      run: npm run test:package
+      run: npm run test:package -- main
 
     - name: Install browsers
       run: npx playwright install
 
     - name: Test browser
       run: npm run test:browser
+      env:
+        REF_VERSION: main
 
 
 
