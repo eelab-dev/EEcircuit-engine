@@ -1,6 +1,6 @@
 {
   "name": "eecircuit-engine",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "EEcircuit's simulation engine",
   "files": [
     "dist"
