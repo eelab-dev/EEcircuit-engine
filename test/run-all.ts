@@ -49,7 +49,11 @@ async function main() {
         if (version === "next") {
             browserEnv.REF_VERSION = "next";
         }
-        await runCommand("npx", ["playwright", "test", "test/test-browser-regression.spec.js"], browserEnv);
+        await runCommand(
+            "npx",
+            ["playwright", "test", "test/test-browser-regression.spec.mts"],
+            browserEnv
+        );
 
         console.log("\nAll tests passed successfully!");
     } catch (error) {

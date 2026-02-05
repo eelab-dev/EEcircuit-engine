@@ -17,11 +17,21 @@ export default [
       // compiled/generated JS (from Emscripten/emsdk or similar)
       "src/spice.js",
       // temp/test artifacts
-      "temp.ts",
+      "temp/**",
     ],
   },
-  { files: ["./src/**/*.{ts}"] },
-  { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+
+  // Source code runs in the browser (via Vite) by default.
+  { files: ["src/**/*.ts"], languageOptions: { globals: globals.browser } },
+
+  // Playwright tests run in Node but execute browser callbacks too.
+  {
+    files: [
+      "test/**/*.{ts,mts,cts,js}",
+      "test/**/*.{spec,test}.{ts,mts,cts,js}",
+    ],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
 ];

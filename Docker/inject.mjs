@@ -14,9 +14,10 @@ const text2rep = `
 result = getInput();
 `;
 
-const text3 = `var _emscripten_sleep = ms => Asyncify.handleSleep(wakeUp => safeSetTimeout(wakeUp, ms));`;
-
-const text3rep = `var _emscripten_sleep = ms => handleThings();`;
+const text3 = `var _emscripten_sleep = function(ms) {
+  let innerFunc = () => new Promise(resolve => setTimeout(resolve, ms));`;
+const text3rep = `var _emscripten_sleep = function(ms) {
+  let innerFunc = () => new Promise(resolve => handleThings());`;
 
 const text4 = `Module["calledRun"] = true;`;
 const text4rep = `Module["calledRun"] = false;`;

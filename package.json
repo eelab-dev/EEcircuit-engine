@@ -1,6 +1,6 @@
 {
   "name": "eecircuit-engine",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "description": "EEcircuit's simulation engine",
   "files": [
     "dist"
@@ -16,25 +16,26 @@
   },
   "scripts": {
     "dev": "vite",
-    "check": "eslint . --ext .ts",
+    "check": "eslint . --ext .ts,.mts,.cts",
     "build": "vite build",
     "preview": "vite preview",
     "test": "npx tsx test/run-all.ts",
     "test:source": "npx tsx test/test.ts",
     "test:package": "npx tsx test/test-package.ts",
-    "test:browser": "npx playwright test test/test-browser-regression.spec.js"
+    "test:browser": "npx playwright test test/test-browser-regression.spec.mts",
+    "test:browser:all": "npx playwright test test/test-browser-regression.spec.mts"
   },
   "author": "Danial Chitnis",
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.5",
+    "@playwright/test": "^1.58.1",
+    "@types/node": "^25.2.0",
     "eslint": "^9.39.2",
-    "globals": "^17.0.0",
+    "globals": "^17.3.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.52.0",
+    "typescript-eslint": "^8.54.0",
     "vite": "^7.3.1",
     "vite-plugin-dts": "^4.5.4"
   }

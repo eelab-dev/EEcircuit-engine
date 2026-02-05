@@ -3,13 +3,15 @@ import { writeFileSync } from "node:fs";
 import type { ComplexNumber, ResultType } from "../src/readOutput.ts";
 
 function isComplexNumber(value: unknown): value is ComplexNumber {
+	type ComplexLike = Record<string, unknown> & { real?: unknown; img?: unknown };
+	const maybe = value as ComplexLike;
 	return (
 		typeof value === "object" &&
 		value !== null &&
 		"real" in value &&
 		"img" in value &&
-		typeof (value as any).real === "number" &&
-		typeof (value as any).img === "number"
+		typeof maybe.real === "number" &&
+		typeof maybe.img === "number"
 	);
 }
 
