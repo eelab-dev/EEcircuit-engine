@@ -2,6 +2,10 @@
   "name": "eecircuit-engine",
   "version": "1.5.9",
   "description": "EEcircuit's simulation engine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eelab-dev/EEcircuit-engine"
+  },
   "files": [
     "dist"
   ],
