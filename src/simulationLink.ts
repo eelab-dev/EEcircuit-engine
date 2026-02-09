@@ -149,6 +149,14 @@ export class Simulation {
     // GF180 MOS/BJT/etc library: provides sections like `.LIB typical`.
     module.FS?.writeFile("/sm141064.ngspice", gf180mos);
 
+    // GF180 modelcards with specific corners
+    module.FS?.writeFile("/modelcard.GF180.typical", gf180 + "\n.lib sm141064.ngspice typical\n");
+    module.FS?.writeFile("/modelcard.GF180.ff", gf180 + "\n.lib sm141064.ngspice ff\n");
+    module.FS?.writeFile("/modelcard.GF180.ss", gf180 + "\n.lib sm141064.ngspice ss\n");
+    module.FS?.writeFile("/modelcard.GF180.fs", gf180 + "\n.lib sm141064.ngspice fs\n");
+    module.FS?.writeFile("/modelcard.GF180.sf", gf180 + "\n.lib sm141064.ngspice sf\n");
+    module.FS?.writeFile("/modelcard.GF180.statistical", gf180 + "\n.lib sm141064.ngspice statistical\n");
+
     // Set the handler to process simulation events.
     module.setHandleThings(() => {
       this.log_debug("handle other things!!!!!");

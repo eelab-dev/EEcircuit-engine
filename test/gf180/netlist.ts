@@ -1,7 +1,6 @@
 export const gf180Netlist = `
 * GF180 Single DC Simulation
-.include modelcard.GF180
-.lib sm141064.ngspice typical
+.include modelcard.GF180.typical
 
 .param Wum=10.0 Lum=10.0
 .param Rext=0.01
