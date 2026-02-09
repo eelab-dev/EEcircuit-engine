@@ -9,25 +9,14 @@ import { skywaterModel } from "./models/skywater/models.ts";
 import Module from "./spice.js";
 
 import { readOutput, ResultType } from "./readOutput.ts";
+import { gf180 } from "./models/gf180/gf180.ts";
+import { gf180mos } from "./models/gf180/gf180mos.ts";
 
 export class Simulation {
-  // Internal instrumentation: count how many times the WASM module is instantiated.
-  // This should be 1 for a given Simulation instance lifetime.
-  private wasmModuleInitCount = 0;
+  private static readonly MAX_INFO_CHARS = 2_000_000;
 
-  // Internal instrumentation: count how many completed simulation runs occurred.
-  private completedRunCount = 0;
-
-  public __getWasmInitCountForTests(): number {
-    return this.wasmModuleInitCount;
-  }
-
-  public __getCompletedRunCountForTests(): number {
-    return this.completedRunCount;
-  }
-
-  public __getCommandListForTests(): string[] {
-    return [...this.commandList];
+  public __getSpiceModuleForTests(): object | null {
+    return this.spiceModule;
   }
 
   private pass = false;
@@ -84,10 +73,10 @@ export class Simulation {
       noInitialRun: true,
       print: (e: string = "") => {
         this.log_debug(e);
-        this.info += e + "\n";
+        this.info = (this.info + e + "\n").slice(-Simulation.MAX_INFO_CHARS);
       },
       printErr: (e: string = "") => {
-        this.info += e + "\n\n";
+        this.info = (this.info + e + "\n\n").slice(-Simulation.MAX_INFO_CHARS);
         if (
           e !== "Warning: can't find the initialization file spinit." &&
           e !== "Using SPARSE 1.3 as Direct Linear Solver"
@@ -140,7 +129,6 @@ export class Simulation {
     // (start() is also guarded, but this keeps things extra safe.)
     let module = this.spiceModule;
     if (!module) {
-      this.wasmModuleInitCount++;
       module = await Module(moduleOptions);
       this.spiceModule = module;
     }
@@ -155,6 +143,11 @@ export class Simulation {
     module.FS?.writeFile("/modelcard.ptm", ptm);
     module.FS?.writeFile("/modelcard.skywater", skywaterModel);
     module.FS?.writeFile("/modelcard.CMOS90", strModelCMOS90);
+    // GF180: global settings include file (switches/corners).
+    module.FS?.writeFile("/modelcard.GF180", gf180);
+
+    // GF180 MOS/BJT/etc library: provides sections like `.LIB typical`.
+    module.FS?.writeFile("/sm141064.ngspice", gf180mos);
 
     // Set the handler to process simulation events.
     module.setHandleThings(() => {
@@ -165,7 +158,7 @@ export class Simulation {
           try {
             this.dataRaw = module.FS?.readFile("out.raw") ?? new Uint8Array();
             this.results = readOutput(this.dataRaw);
-            this.completedRunCount++;
+            this.results = readOutput(this.dataRaw);
             this.outputEvent(this.output); // external callback
             // Resolve the run promise with the results.
             if (this.runPromiseResolve) {

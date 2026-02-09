@@ -139,3 +139,6 @@ build
 spice.js
 *.wasm
 temp
+
+test/python/output
+__pycache__
