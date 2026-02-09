@@ -39,6 +39,10 @@ async function main() {
         console.log("\n--- Testing WASM reuse ---");
         await runCommand("npx", ["tsx", "test/test-wasm-reuse.ts"]);
 
+        // 2.7 Test GF180
+        console.log("\n--- Testing GF180 simulation ---");
+        await runCommand("npx", ["tsx", "test/gf180/test.ts"]);
+
         // 3. Test Package
         console.log("\n--- Testing Package ---");
         await runCommand("npx", ["tsx", "test/test-package.ts", ...args]);

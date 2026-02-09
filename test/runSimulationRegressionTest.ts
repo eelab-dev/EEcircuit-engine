@@ -69,9 +69,11 @@ export async function runSimulation(
 export async function runSimulationRegressionTest(
     createSimulation: SimulationFactory,
     netList: string,
-    version: string = "main"
+    version: string = "main",
+    customRefPath?: string
 ): Promise<void> {
-    const refDataPath = join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
+    const refDataPath =
+        customRefPath ?? join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
 
     const result = await runSimulation(createSimulation, netList);
 

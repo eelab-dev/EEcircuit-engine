@@ -1,8 +1,9 @@
-import { writeFileSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { resolve, join } from "node:path";
-import { Simulation } from "../src/simulationLink.ts";
-import { runSimulation } from "./runSimulationRegressionTest.ts";
-import type { ResultType } from "../src/readOutput.ts";
+import { Simulation } from "../../src/simulationLink.ts";
+import { runSimulation } from "../runSimulationRegressionTest.ts";
+import type { ResultType } from "../../src/readOutput.ts";
+import { gf180Netlist } from "./netlist.ts";
 
 function toCsv(result: ResultType): string {
     const headers = result.variableNames;
@@ -29,51 +30,19 @@ function toCsv(result: ResultType): string {
     return lines.join("\n") + "\n";
 }
 
-import { mkdirSync } from "node:fs";
-
 async function main(): Promise<void> {
     const outputDir = resolve(join(process.cwd(), "test", "python", "output"));
     mkdirSync(outputDir, { recursive: true });
     const csvPath = join(outputDir, "gf180_dc.csv");
 
-    // Single DC simulation netlist
-    // Vg = 3.3V fixed, Vd sweep 0 to 3.3V
-    const netlist = `
-* GF180 Single DC Simulation
-.include modelcard.GF180
-.lib sm141064.ngspice typical
-
-.param Wum=10.0 Lum=10.0
-.param Rext=0.01
-.param Ldiff_um=0.24
-.param AD_um2={Wum*Ldiff_um}
-.param PD_um={2*(Wum+Ldiff_um)}
-
-* Circuit
-Rd_ext d_supply d {Rext}
-Rs_ext s_virt 0 {Rext}
-X1 d g s_virt 0 nmos_3p3 w={Wum*1u} l={Lum*1u} ad={AD_um2}p as={AD_um2}p pd={PD_um}u ps={PD_um}u m=1.0
-
-Vd d_supply 0 0
-Vg g 0 3.3
-
-.dc Vd 0 3.3 0.01
-
-.control
-run
-write out.raw
-.endc
-.end
-`;
-
     console.log("Netlist:");
-    console.log(netlist);
+    console.log(gf180Netlist);
 
     const sim = new Simulation();
 
     try {
         console.log("Running simulation...");
-        const result = await runSimulation(() => sim, netlist);
+        const result = await runSimulation(() => sim, gf180Netlist);
 
         const errors = sim.getError();
         if (errors.length > 0) {
