@@ -46953,7 +46953,7 @@ rb  1 2 r='r_temp*r_n*(r_rsh0+r_vc1*abs(v(1,2))/r_n+r_vc2*abs(v(1,2))*abs(v(1,2)
 *  A single resistor is used to simulate the resistance.
 *
 *                                  Rfuse
-*                          in  o--/\/\/\/--o  out
+*                          in  o--/\\/\\/\\/--o  out
 *
 *******************************************************************************
 *

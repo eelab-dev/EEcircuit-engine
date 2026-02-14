@@ -18,6 +18,8 @@ export default [
       "src/spice.js",
       // temp/test artifacts
       "temp/**",
+      ".venv/**",
+      "node_modules/**",
     ],
   },
   pluginJs.configs.recommended,
