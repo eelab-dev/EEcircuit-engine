@@ -1,6 +1,6 @@
 {
   "name": "eecircuit-engine",
-  "version": "1.5.9",
+  "version": "1.6.0",
   "description": "EEcircuit's simulation engine",
   "repository": {
     "type": "git",
