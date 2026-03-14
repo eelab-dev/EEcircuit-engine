@@ -32,8 +32,10 @@ async function main(): Promise<void> {
 
 
     // Running simulations should reuse the already-loaded wasm module.
+    console.log("Running simulation #1 (bsimTrans)...");
     sim.setNetList(bsimTrans);
-    await sim.runSim();
+    const res1 = await sim.runSim();
+    if (res1.numPoints === 0) throw new Error("Simulation #1 failed to produce data");
 
     const m3 = sim.__getSpiceModuleForTests();
     if (m1 !== m3) {
@@ -42,9 +44,39 @@ async function main(): Promise<void> {
         );
     }
 
-
+    console.log("Running simulation #2 (bsimTrans again)...");
     sim.setNetList(bsimTrans);
-    await sim.runSim();
+    const res2 = await sim.runSim();
+    if (res2.numPoints === 0) throw new Error("Simulation #2 failed to produce data");
+
+    const m4 = sim.__getSpiceModuleForTests();
+    if (m1 !== m4) {
+        throw new Error(
+            `Expected spice module reference to be identical after runSim() #2; got new instance`
+        );
+    }
+
+    console.log("Running simulation #3 (simple RC)...");
+    const simpleRC = `Simple RC
+r1 1 2 1k
+c1 2 0 1u
+v1 1 0 pulse(0 5 1m 1u 1u 5m 10m)
+.tran 10u 20m
+.end
+`;
+    sim.setNetList(simpleRC);
+    const res3 = await sim.runSim();
+    if (res3.numPoints === 0) throw new Error("Simulation #3 failed to produce data");
+    if (res3.numVariables !== 4) { // time, v(1), v(2), i(v1)
+        throw new Error(`Expected 4 variables for simple RC, got ${res3.numVariables}`);
+    }
+
+    const m5 = sim.__getSpiceModuleForTests();
+    if (m1 !== m5) {
+        throw new Error(
+            `Expected spice module reference to be identical after runSim() #3; got new instance`
+        );
+    }
 
 
     // Recreating the Simulation instance should start with counters reset.
