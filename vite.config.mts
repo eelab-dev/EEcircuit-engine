@@ -13,6 +13,14 @@ export default defineConfig({
       fileName: "eecircuit-engine",
     },
     rollupOptions: {
+      onwarn(warning, warn) {
+        // Rolldown can print an enormous code frame for EMPTY_IMPORT_META when
+        // a large inlined data URL appears in transformed output.
+        if (warning.code === "EMPTY_IMPORT_META") {
+          return;
+        }
+        warn(warning);
+      },
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       external: [],
