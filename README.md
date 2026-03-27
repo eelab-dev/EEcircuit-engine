@@ -55,3 +55,7 @@ You can now access the result of the simulation.
 ```javascript
 console.log(result);
 ```
+
+## Simulation Models
+
+For the list of supported models, please refer to the [model documentation](models.md).
