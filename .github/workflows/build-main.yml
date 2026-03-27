@@ -62,7 +62,7 @@ jobs:
       run: npm run test:package -- main
 
     - name: Install browsers
-      run: npx playwright install
+      run: npx playwright install --with-deps
 
     - name: Test browser
       run: npm run test:browser
