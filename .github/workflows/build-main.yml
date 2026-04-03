@@ -34,9 +34,6 @@ jobs:
     - name: Run Docker Container
       run: docker run -t -e VERSION=main -v $(realpath ./Docker):/mnt eecircuit
 
-    - name: Run Inject.mjs
-      run: node ./Docker/inject.mjs
-
     - name: Rename and Copy Files to Main Directory
       run: |
         cp ./Docker/build/spice.wasm ./src/spice.wasm
