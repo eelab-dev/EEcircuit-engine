@@ -41,7 +41,7 @@ jobs:
     - name: Rename and Copy Files to Main Directory
       run: |
         cp ./Docker/build/spice.wasm ./src/spice.wasm
-        cp ./Docker/build/spice-eesim.js ./src/spice.js
+        cp ./Docker/build/spice.js ./src/spice.js
 
     - uses: actions/setup-node@v4
       with:
