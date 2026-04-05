@@ -16,14 +16,14 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: eelab-dev/EEcircuit-engine
         ref: main  # Checkout the "main" branch
 
     
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
 
     - name: Create Empty Build Directory
       run: mkdir -p Docker/build
@@ -39,7 +39,7 @@ jobs:
         cp ./Docker/build/spice.wasm ./src/spice.wasm
         cp ./Docker/build/spice.js ./src/spice.js
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         registry-url: 'https://registry.npmjs.org'
 
