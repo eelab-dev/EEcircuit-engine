@@ -135,7 +135,7 @@ export class Simulation {
 
     // Write required files
     module.FS?.writeFile("/spinit", "* Standard ngspice init file\n");
-    module.FS?.writeFile("/proc/meminfo", "");
+    module.FS?.writeFile("/proc/meminfo", "MemTotal: 2097152 kB\nMemFree: 2097152 kB\nMemAvailable: 2097152 kB\n");
     module.FS?.writeFile("/modelcard.FreePDK45", PDK45);
     module.FS?.writeFile("/modelcard.PDK15", PDK15);
     module.FS?.writeFile("/modelcard.ptmLP", ptmLP);
