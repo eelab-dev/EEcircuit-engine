@@ -33,14 +33,14 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.58.2",
-    "@types/node": "^25.3.0",
-    "eslint": "^10.1.0",
-    "globals": "^17.3.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.2",
-    "vite-plugin-dts": "^4.5.4"
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "tsx": "^4.23.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.66.0",
+    "vite": "^8.2.1",
+    "vite-plugin-dts": "^5.0.3"
   }
 }

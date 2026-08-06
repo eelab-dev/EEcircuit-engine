@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
+    "types": ["node"],
     "noEmit": true,
     /*"paths": {
       "react": ["./node_modules/preact/compat/"],

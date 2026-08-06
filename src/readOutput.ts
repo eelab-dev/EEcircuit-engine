@@ -54,9 +54,11 @@ export type RealNumber = number;
 export type ComplexNumber = { real: number; img: number };
 
 export function readRawOutput(rawData: Uint8Array): RawResultType {
-  //
+  // Make a non-resizable copy of rawData to avoid "The provided ArrayBuffer value must not be resizable"
+  // error in newer browsers when WebAssembly.Memory is resizable.
+  const copiedData = new Uint8Array(rawData);
 
-  const resultStr = ab2str(rawData);
+  const resultStr = ab2str(copiedData);
 
   const offset = resultStr.indexOf("Binary:");
   log(`file-> ${offset}`);
@@ -68,7 +70,7 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
   log(header);
   log(param);
 
-  const view = new DataView(rawData.buffer, offset + 8);
+  const view = new DataView(copiedData.buffer, offset + 8);
 
   for (let i = 0; i < view.byteLength; i = i + 8) {
     const d = view.getFloat64(i, true);

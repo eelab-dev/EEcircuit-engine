@@ -65,7 +65,8 @@ if [ "$VERSION" == "next" ]; then
   echo "build: Checking out the branch pre-master-$branch_version"
   git checkout "pre-master-$branch_version" || { echo "build: Checkout failed, stopping execution"; exit 1; }
 else
-  echo "build: Checking out the master branch for version $latest_version"
+  echo "build: Checking out the latest release tag ngspice-$latest_version"
+  git checkout "ngspice-$latest_version" || git checkout master || { echo "build: Checkout failed, stopping execution"; exit 1; }
 fi
 
 ############################################
@@ -90,6 +91,9 @@ sed -i 's/AC_CHECK_FUNCS(\[time getrusage\])/AC_CHECK_FUNCS(\[time\])/g' ./confi
 sed -i 's|#include "ngspice/ngspice.h"|#include <emscripten.h>\n\nEM_ASYNC_JS(void, eesim_sleep_hack, (), {\n    if (Module["handleThings"]) {\n        await new Promise((resolve) => {\n            Module["handleThings"]();\n        });\n    }\n});\n\n#include "ngspice/ngspice.h"|g' ./src/frontend/control.c
 sed -i 's|freewl = wlist = getcommand(string);|eesim_sleep_hack();\n\n\t\tfreewl = wlist = getcommand(string);|g' ./src/frontend/control.c
 
+# Verify the critical sleep hack patches were applied successfully and did not fail silently
+grep -q "eesim_sleep_hack" ./src/frontend/control.c || { echo "ERROR: eesim_sleep_hack patch failed to apply to control.c! Upstream ngspice source code may have changed."; exit 1; }
+
 
 ############################################
 
@@ -105,6 +109,9 @@ wait
 
 # ngspice$(EXEEXT)
 sed -i 's|$(ngspice_LDADD) $(LIBS)|$(ngspice_LDADD) $(LIBS) -O2 -s ASYNCIFY=1 -s ASYNCIFY_ADVISE=0 -s ASYNCIFY_IGNORE_INDIRECT=0 -s ENVIRONMENT="web,worker" -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORTED_RUNTIME_METHODS=["FS","Asyncify","callMain"] --pre-js /mnt/pre.js -o spice.mjs|g' ./src/Makefile
+
+# Verify that the Makefile was successfully patched with Asyncify and Emscripten flags
+grep -q "ASYNCIFY=1" ./src/Makefile || { echo "ERROR: Makefile could not be patched with Emscripten/Asyncify compilation flags! Upstream configure or Makefile structure may have changed."; exit 1; }
 
 
 

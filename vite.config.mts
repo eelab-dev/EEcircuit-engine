@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, "src/main.ts"),
+      entry: resolve(import.meta.dirname, "src/main.ts"),
       name: "EEcircuit-engine",
       // the proper extensions will be added
       fileName: "eecircuit-engine",

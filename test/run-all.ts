@@ -3,7 +3,10 @@ import { spawn } from "node:child_process";
 async function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv = process.env) {
     return new Promise<void>((resolve, reject) => {
         console.log(`> ${command} ${args.join(" ")}`);
-        const child = spawn(command, args, { stdio: "inherit", shell: true, env });
+        const executable = process.platform === "win32" && !command.endsWith(".cmd") && !command.endsWith(".exe")
+            ? `${command}.cmd`
+            : command;
+        const child = spawn(executable, args, { stdio: "inherit", env });
 
         child.on("close", (code) => {
             if (code === 0) {

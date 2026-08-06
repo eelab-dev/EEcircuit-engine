@@ -33,13 +33,21 @@ export function ensureFileFetch(): void {
         if (target.startsWith("file://")) {
             const buffer = await readFile(fileURLToPath(target));
             const body = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-            return new Response(body as unknown as BodyInit, { status: 200 });
+            const headers = new Headers();
+            if (target.endsWith(".wasm")) {
+                headers.set("content-type", "application/wasm");
+            }
+            return new Response(body as unknown as BodyInit, { status: 200, headers });
         }
 
         if (!/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(target)) {
             const buffer = await readFile(target);
             const body = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-            return new Response(body as unknown as BodyInit, { status: 200 });
+            const headers = new Headers();
+            if (target.endsWith(".wasm")) {
+                headers.set("content-type", "application/wasm");
+            }
+            return new Response(body as unknown as BodyInit, { status: 200, headers });
         }
 
         if (originalFetch) {
