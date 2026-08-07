@@ -138,6 +138,7 @@ build
 
 spice.js
 *.wasm
+build-meta.json
 temp
 
 test/python/output

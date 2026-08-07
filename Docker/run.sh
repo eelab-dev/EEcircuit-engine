@@ -130,6 +130,12 @@ mv spice.mjs spice.js
 mkdir -p /mnt/build
 \cp spice.js spice.wasm /mnt/build
 
+BUILD_VERSION="${VERSION:-main}"
+if [ "$BUILD_VERSION" != "next" ]; then
+  BUILD_VERSION="main"
+fi
+echo "{\"version\": \"$BUILD_VERSION\"}" > /mnt/build/build-meta.json
+
 echo "build: Build artifacts are copied to /mnt/build"
 
 ############################################

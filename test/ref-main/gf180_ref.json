@@ -1,5 +1,5 @@
 {
-    "header": "Title: \nDate: Mon Feb  9 00:06:58  2026\nCommand: ngspice-45.2+, Build Thu Feb  5 00:47:16 UTC 2026\nPlotname: DC transfer characteristic\nFlags: real\nNo. Variables: 7\nNo. Points: 331\nVariables:\n\t0\tv(v-sweep)\tvoltage\n\t1\tv(d)\tvoltage\n\t2\tv(d_supply)\tvoltage\n\t3\tv(g)\tvoltage\n\t4\tv(s_virt)\tvoltage\n\t5\ti(vd)\tcurrent\n\t6\ti(vg)\tcurrent\n\n",
+    "header": "Title: \nDate: Sat Aug  8 00:34:23  2026\nCommand: ngspice-45.2, Build Fri Aug  7 23:26:47 UTC 2026\nPlotname: DC transfer characteristic\nFlags: real\nNo. Variables: 7\nNo. Points: 331\nVariables:\n\t0\tv(v-sweep)\tvoltage\n\t1\tv(d)\tvoltage\n\t2\tv(d_supply)\tvoltage\n\t3\tv(g)\tvoltage\n\t4\tv(s_virt)\tvoltage\n\t5\ti(vd)\tcurrent\n\t6\ti(vg)\tcurrent\n\n",
     "numVariables": 7,
     "variableNames": [
         "v(v-sweep)",

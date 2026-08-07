@@ -71,7 +71,20 @@ async function startStaticServer(
 	rootDir: string
 ): Promise<{ server: Server; port: number }> {
 	const resolvedRoot = path.resolve(rootDir);
-	const version = process.env.REF_VERSION || "main";
+	let version = process.env.REF_VERSION;
+	if (!version) {
+		try {
+			const metaPath = path.join(resolvedRoot, "src", "build-meta.json");
+			const content = await fs.readFile(metaPath, "utf-8");
+			const meta = JSON.parse(content) as { version?: string };
+			if (meta.version === "next" || meta.version === "main") {
+				version = meta.version;
+			}
+		} catch {
+			/* Fallback */
+		}
+	}
+	if (!version) version = "main";
 
 	return await new Promise((resolve, reject) => {
 		const server = http.createServer(async (req, res) => {

@@ -5,21 +5,28 @@ import { Simulation } from "../../src/simulationLink.ts";
 import { runSimulation } from "../runSimulationRegressionTest.ts";
 import { gf180Netlist } from "./netlist.ts";
 
-async function main(): Promise<void> {
-    console.log("Generating GF180 reference data...");
+async function generateRef(version: string) {
+    console.log(`Generating GF180 reference data for version: ${version}`);
     const result = await runSimulation(() => new Simulation(), gf180Netlist);
 
-    // Go up two levels: test/gf180 -> test -> root, then down to test/ref-main
-    // actually fileURLToPath is test/gf180/genRefs.ts
-    // dirname is test/gf180
-    // so ../../test/ref-main ? No.
-    // test/gf180/../ref-main is test/ref-main.
-    const refDir = join(dirname(fileURLToPath(import.meta.url)), "../ref-main");
+    const refDir = join(dirname(fileURLToPath(import.meta.url)), `../ref-${version}`);
     mkdirSync(refDir, { recursive: true });
 
     const refPath = join(refDir, "gf180_ref.json");
     writeFileSync(refPath, JSON.stringify(result, null, 4));
     console.log(`Wrote reference data to: ${refPath}`);
+}
+
+async function main(): Promise<void> {
+    const args = process.argv.slice(2);
+    const targetVersion = args[0];
+
+    if (targetVersion) {
+        await generateRef(targetVersion);
+    } else {
+        await generateRef("main");
+        await generateRef("next");
+    }
 }
 
 main().catch((error) => {

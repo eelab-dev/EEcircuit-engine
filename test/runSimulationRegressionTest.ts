@@ -74,14 +74,28 @@ export async function runSimulation(
     return await sim.runSim();
 }
 
+export function getActiveBuildVersion(): string {
+    try {
+        const metaPath = join(dirname(fileURLToPath(import.meta.url)), "../src/build-meta.json");
+        const meta = JSON.parse(readFileSync(metaPath, "utf-8")) as { version?: string };
+        if (meta.version === "next" || meta.version === "main") {
+            return meta.version;
+        }
+    } catch {
+        /* Fallback */
+    }
+    return "main";
+}
+
 export async function runSimulationRegressionTest(
     createSimulation: SimulationFactory,
     netList: string,
-    version: string = "main",
+    version?: string,
     customRefPath?: string
 ): Promise<void> {
+    const activeVersion = version ?? getActiveBuildVersion();
     const refDataPath =
-        customRefPath ?? join(dirname(fileURLToPath(import.meta.url)), `ref-${version}`, "ref-result.json");
+        customRefPath ?? join(dirname(fileURLToPath(import.meta.url)), `ref-${activeVersion}`, "ref-result.json");
 
     const result = await runSimulation(createSimulation, netList);
 

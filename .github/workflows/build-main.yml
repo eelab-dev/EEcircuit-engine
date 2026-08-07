@@ -17,9 +17,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v6
-      with:
-        repository: eelab-dev/EEcircuit-engine
-        ref: main  # Checkout the "main" branch
 
     
     - name: Set up Docker Buildx
@@ -38,8 +35,9 @@ jobs:
       run: |
         cp ./Docker/build/spice.wasm ./src/spice.wasm
         cp ./Docker/build/spice.js ./src/spice.js
+        cp ./Docker/build/build-meta.json ./src/build-meta.json
 
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@v4
       with:
         registry-url: 'https://registry.npmjs.org'
 
@@ -50,21 +48,19 @@ jobs:
       run: npm install
 
     - name: Test node (source)
-      run: npm run test:source -- main
+      run: npm run test:source
     
     - name: Build Project with Vite
       run: npm run build
 
     - name: Test node (package)
-      run: npm run test:package -- main
+      run: npm run test:package
 
     - name: Install browsers
       run: npx playwright install --with-deps
 
     - name: Test browser
       run: npm run test:browser
-      env:
-        REF_VERSION: main
 
 
 

@@ -25,5 +25,6 @@ echo "build: copying files to src folder"
 
 cp ./Docker/build/spice.wasm ./src/spice.wasm || exit 1
 cp ./Docker/build/spice.js ./src/spice.js || exit 1
+cp ./Docker/build/build-meta.json ./src/build-meta.json || exit 1
 
 echo "build: build script has ended"
