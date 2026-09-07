@@ -38,6 +38,9 @@ async function main() {
         // 2.3 Run an actual .noise simulation and validate header
         console.log("\n--- Running .noise simulation ---");
         await runCommand("npx", ["tsx", "test/test-noise-run.ts"]);
+        // 2.4 Verify the FreePDK15 NMOS and PMOS card can be instantiated.
+        console.log("\n--- Running FreePDK15 simulation ---");
+        await runCommand("npx", ["tsx", "test/test-freepdk15.ts"]);
         // 2.5 Test WASM reuse
         console.log("\n--- Testing WASM reuse ---");
         await runCommand("npx", ["tsx", "test/test-wasm-reuse.ts"]);
