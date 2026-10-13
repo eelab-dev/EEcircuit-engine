@@ -98,13 +98,22 @@ grep -q "eesim_sleep_hack" ./src/frontend/control.c || { echo "ERROR: eesim_slee
 ############################################
 
 echo -e "\n"
+echo "build: Statically linking XSPICE (spice2poly for POLY)"
+
+cp /xspice_static.sh ./xspice_static.sh
+./xspice_static.sh || { echo "build: XSPICE static patch failed, stopping execution"; exit 1; }
+
+
+############################################
+
+echo -e "\n"
 echo "build: Building ngspice..."
 
 ./autogen.sh
 mkdir release
 cd release
 
-emconfigure ../configure --disable-debug --disable-openmp --disable-xspice --disable-osdi --without-x -with-readline=no
+emconfigure ../configure --disable-debug --disable-openmp --enable-xspice --disable-osdi --without-x -with-readline=no
 wait
 
 # ngspice$(EXEEXT)
