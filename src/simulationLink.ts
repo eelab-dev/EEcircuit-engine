@@ -88,6 +88,17 @@ export class Simulation {
         }
       },
       preRun: [() => this.log_debug("from prerun")],
+      onExit: (status: number) => {
+        // Resolve the run or init promise, so runSim doesn't get stuck
+        if (this.runPromiseResolve) {
+          this.runPromiseResolve(this.results);
+          this.runPromiseResolve = null;
+        }
+        else if (!this.initialized && this.initPromiseResolve) {
+          this.initPromiseResolve();
+          this.initPromiseResolve = null;
+        }
+      },
       setGetInput: this.getInput,
       setHandleThings: () => {
         /* No-op */
