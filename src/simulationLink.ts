@@ -24,6 +24,8 @@ export class Simulation {
   private commandList = [" ", "source test.cir", "destroy all", "run", "write out.raw"];
   private isNoiseMode = false;
   private cmd = 0;
+  // destroy all releases plots, but a sourced circuit survives until remcirc.
+  private circuitCleanupPending = false;
   private dataRaw: Uint8Array = new Uint8Array();
   private results: ResultType = {} as ResultType;
   private output = "";
@@ -52,7 +54,14 @@ export class Simulation {
     let strCmd = " ";
     if (this.cmd < this.commandList.length) {
       strCmd = this.commandList[this.cmd];
-      this.cmd++;
+      if (strCmd === "source test.cir" && this.circuitCleanupPending) {
+        // Keep the source command queued until the previous circuit is removed.
+        strCmd = "remcirc";
+        this.circuitCleanupPending = false;
+      } else {
+        this.cmd++;
+        if (strCmd === "source test.cir") this.circuitCleanupPending = true;
+      }
     } else {
       this.cmd = 0;
     }

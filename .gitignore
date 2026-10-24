@@ -143,3 +143,6 @@ temp
 
 test/python/output
 __pycache__
+
+# Local-only test harnesses
+/test/local/

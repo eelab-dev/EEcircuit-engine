@@ -17,6 +17,7 @@ export default [
       // compiled/generated JS (from Emscripten/emsdk or similar)
       "src/spice.js",
       // temp/test artifacts
+      "test-results/**",
       "temp/**",
       ".venv/**",
       "node_modules/**",

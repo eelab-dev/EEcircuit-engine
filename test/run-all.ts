@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { retentionCases } from "./retention.ts";
 
 async function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv = process.env) {
     return new Promise<void>((resolve, reject) => {
@@ -53,6 +54,14 @@ async function main() {
         console.log("\n--- Testing Package ---");
         await runCommand("npx", ["tsx", "test/test-package.ts", ...args]);
 
+        // Exercise retention through both public entrypoints in fresh processes.
+        for (const runtime of ["source", "package"]) {
+            for (const fixture of [...retentionCases, "lifecycle"]) {
+                await runCommand(process.execPath,
+                    ["--import", "tsx", "test/test-heap-retention.mts", runtime, fixture]);
+            }
+        }
+
         // 4. Test Browser
         console.log("\n--- Testing Browser ---");
         const browserEnv = { ...process.env };
@@ -61,7 +70,8 @@ async function main() {
         }
         await runCommand(
             "npx",
-            ["playwright", "test", "test/test-browser-regression.spec.mts"],
+            ["playwright", "test", "test/test-browser-regression.spec.mts",
+                "test/benchmark-opamp.spec.mts", "test/heap-retention.spec.mts"],
             browserEnv
         );
 
