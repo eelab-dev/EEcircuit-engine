@@ -28,6 +28,9 @@ async function main() {
     const version = args[0]; // "next" or undefined (main)
 
     try {
+        await runCommand("npm", ["run", "check"]);
+        await runCommand("npm", ["run", "test:toolchain"]);
+
         // 1. Build
         console.log("\n--- Building ---");
         await runCommand("npm", ["run", "build"]);
@@ -53,6 +56,8 @@ async function main() {
         // 3. Test Package
         console.log("\n--- Testing Package ---");
         await runCommand("npx", ["tsx", "test/test-package.ts", ...args]);
+
+        await runCommand("npm", ["run", "test:consumer"]);
 
         // Exercise retention through both public entrypoints in fresh processes.
         for (const runtime of ["source", "package"]) {

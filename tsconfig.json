@@ -6,7 +6,6 @@
     "target": "esnext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "baseUrl": "./",
     /* Additional Options */
     "strict": true,
     "skipLibCheck": true,

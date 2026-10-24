@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "test/**/*.ts",
+    "test/**/*.mts",
+    "test/**/*.cts",
+    "vite.config.mts",
+    "playwright.config.ts"
+  ],
+  "exclude": [
+    "test/local/**"
+  ],
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

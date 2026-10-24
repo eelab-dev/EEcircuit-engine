@@ -101,3 +101,32 @@ the Playwright report.
 
 Local test helpers may live in `test/local/`, which is ignored by Git and is not
 required to run the shared regression suite.
+
+## Development tooling and consumer compatibility
+
+Development uses native TypeScript 7 and Oxlint. No older TypeScript compiler or
+compatibility alias belongs in this repository's dependency tree.
+
+```bash
+npm ci
+npm run check          # Native lint, library types, shared tests and configuration
+npm run test:toolchain # Compiler dependency invariant and legacy-octal rejection
+npm run build         # Vite JavaScript first, then native declaration emission
+npm run test:consumer  # Packed ESM and public declarations with TS6 and TS7 consumers
+```
+
+`npm run lint`, `npm run typecheck`, and `npm run build:types` also run separately.
+Type checking does not require an existing `dist/`. Vite's JavaScript targets,
+package entrypoints, and consumer compiler requirements remain unchanged.
+
+The consumer smoke test packs the current build, installs it in temporary
+consumer projects, and checks all public types with declaration checking enabled.
+It obtains TypeScript 6.0.3 and 7.0.2 through `npm exec` outside this repository's
+development tree. Network access is needed unless those compilers are cached.
+Temporary projects are removed on completion. Set `TEST_ARTIFACT_DIR` to retain
+the compatibility report. The unified test command includes these checks.
+
+Oxlint's configuration was ported with the official migration tool. Existing
+rule severities, options, environments, and generated-file exclusions are explicit
+in `.oxlintrc.json`; no additional style preset is enabled. The strict-mode parser
+rejects legacy octal literals, covered by `test/fixtures/legacy-octal.txt`.

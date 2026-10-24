@@ -52,6 +52,9 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
+    - name: Check lint and types
+      run: npm run check
+
     - name: Test node (source)
       run: npm run test:source
     
@@ -60,6 +63,9 @@ jobs:
 
     - name: Test node (package)
       run: npm run test:package
+
+    - name: Test packed consumers and toolchain
+      run: npm run test:consumer && npm run test:toolchain
 
     - name: Install browsers
       run: npx playwright install --with-deps

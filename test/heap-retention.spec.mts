@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { transpileModule, ModuleKind, ScriptTarget } from "typescript";
+import { transform } from "esbuild";
 import { retentionCases, type MemorySample } from "./retention.ts";
 
 const root = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
@@ -25,9 +25,9 @@ async function startServer() {
       let data: string | Uint8Array = await fs.readFile(filename);
       const extension = path.extname(filename);
       if (extension === ".ts") {
-        data = transpileModule(data.toString(), {
-          compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 },
-        }).outputText;
+        data = (await transform(data.toString(), {
+          loader: "ts", format: "esm", target: "es2022", sourcefile: filename,
+        })).code;
       }
       const mime = extension === ".wasm" ? "application/wasm"
         : [".ts", ".mjs", ".js"].includes(extension) ? "text/javascript" : "text/plain";

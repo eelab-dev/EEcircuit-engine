@@ -6,7 +6,8 @@ import {
 
 async function main(): Promise<void> {
     const version = process.argv[2];
-    const { Simulation } = (await import("../dist/eecircuit-engine.mjs")) as {
+    const entry = "../dist/eecircuit-engine.mjs";
+    const { Simulation } = (await import(entry)) as {
         Simulation: new () => SimulationInstance;
     };
 
