@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
   wget \
   curl \
   bison \
+  flex \
   python3
 
 RUN apt-get -y install autoconf automake bzip2
@@ -28,9 +29,11 @@ RUN apt-get -y install libtool which
 
 COPY ./run.sh /
 COPY ./hicum2_patch.sh /
+COPY ./xspice_static.sh /
 
 RUN chmod +x /run.sh
 RUN chmod +x /hicum2_patch.sh
+RUN chmod +x /xspice_static.sh
 
 
 ENTRYPOINT ["/run.sh"]
