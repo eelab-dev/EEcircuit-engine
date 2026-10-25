@@ -43,7 +43,14 @@ async function startServer() {
 }
 
 for (const fixture of [...retentionCases, "lifecycle"]) {
-  test("browser heap " + fixture, async ({ page }, testInfo) => {
+  test("browser heap " + fixture, async ({ page, browserName }, testInfo) => {
+    test.skip(fixture !== "lifecycle" && browserName !== "chromium",
+      "500-run browser retention is covered in Chromium");
+    page.on("console", message => {
+      if (message.text().startsWith("[heap sample] ")) {
+        console.log(browserName + " " + message.text());
+      }
+    });
     const { server, url } = await startServer();
     try {
       await page.goto(url);
@@ -55,13 +62,19 @@ for (const fixture of [...retentionCases, "lifecycle"]) {
         const helpers = await load("/test/retention.ts") as unknown as typeof import("./retention.ts");
         const Simulation = api.Simulation as import("./retention.ts").SimulationConstructor;
         const samples: MemorySample[] = [];
+        const started = performance.now();
         try {
           if (name === "lifecycle") await helpers.verifyRetentionLifecycle(Simulation);
           else {
             const opamp = await (await fetch("/test/opamp.cir")).text();
             await helpers.verifyHeapRetention(Simulation,
               helpers.retentionNetlist(name as import("./retention.ts").RetentionCase, opamp),
-              sample => samples.push(sample));
+              sample => {
+                samples.push(sample);
+                console.log("[heap sample] " + JSON.stringify({
+                  fixture: name, ...sample, elapsedMs: performance.now() - started,
+                }));
+              });
           }
           return { samples, failure: null };
         } catch (error) {
@@ -71,7 +84,7 @@ for (const fixture of [...retentionCases, "lifecycle"]) {
       await testInfo.attach("heap-" + fixture + ".json", {
         body: JSON.stringify(result, null, 2), contentType: "application/json",
       });
-      console.log(JSON.stringify({ runtime: "browser", fixture, ...result }));
+      console.log(JSON.stringify({ runtime: "browser", browser: browserName, fixture, ...result }));
       expect(result.failure).toBeNull();
     } finally {
       await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));

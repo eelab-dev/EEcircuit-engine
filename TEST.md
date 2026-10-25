@@ -95,7 +95,9 @@ of results returned before cleanup. Circuit diagnostics are executed inside the
 test netlists' control sections, including the existing GF180 control block.
 
 `npm run test:browser:all` includes the browser memory regressions and op-amp
-benchmark. Set `TEST_ARTIFACT_DIR` when running the Node heap tests to save JSON
+benchmark. The 500-run browser memory regressions run only in Chromium; Firefox
+and WebKit retain the short lifecycle, simulation regression, and benchmark checks.
+Set `TEST_ARTIFACT_DIR` when running the Node heap tests to save JSON
 memory measurements to a chosen directory. Browser measurements are attached to
 the Playwright report.
 
