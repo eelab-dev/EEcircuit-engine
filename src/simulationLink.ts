@@ -86,9 +86,12 @@ export class Simulation {
       },
       printErr: (e: string = "") => {
         this.info = (this.info + e + "\n\n").slice(-Simulation.MAX_INFO_CHARS);
+        // ngspice sends routine convergence progress to stderr; retain it in getInfo().
         if (
           e !== "Warning: can't find the initialization file spinit." &&
-          e !== "Using SPARSE 1.3 as Direct Linear Solver"
+          e !== "Using SPARSE 1.3 as Direct Linear Solver" &&
+          e !== "Note: Starting dynamic gmin stepping" &&
+          e !== "Note: Dynamic gmin stepping completed"
         ) {
           console.error(e);
           this.error.push(e);

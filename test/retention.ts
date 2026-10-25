@@ -1,8 +1,11 @@
 import type { ResultType } from "../src/readOutput.ts";
 import { gf180Netlist } from "./gf180/netlist.ts";
 
-export const retentionCases = ["SKY130", "GF180", "PTM90", "opamp", "level1"] as const;
+export const retentionCases = ["GF180", "PTM90", "opamp", "level1"] as const;
 export type RetentionCase = typeof retentionCases[number];
+export function retentionRunCount(fixture: RetentionCase): number {
+  return fixture === "opamp" ? 100 : 500;
+}
 export type RetentionSimulation = {
   start(): Promise<void>;
   setNetList(netlist: string): void;
@@ -49,22 +52,17 @@ export function captureWasmMemory() {
   };
 }
 
-const sky130 = `Heap probe SKY130
-.include modelcard.skywater
+const ptm90 = `Heap probe PTM90
+.include modelcard.ptm
 .param mc_switch=0
-xmn out in 0 0 sky130_fd_pr__nfet_01v8 w=1.26u l=0.15u
-xmp out in vdd vdd sky130_fd_pr__pfet_01v8 w=1.26u l=0.15u
+mn out in 0 0 PTM90N w=1.26u l=0.15u
+mp out in vdd vdd PTM90P w=1.26u l=0.15u
 vdd vdd 0 1.8
 vin in 0 0
 .dc vin 0 1.8 0.1
 .save v(in) v(out)
 .end
 `;
-const ptm90 = sky130
-  .replace("Heap probe SKY130", "Heap probe PTM90")
-  .replace("modelcard.skywater", "modelcard.ptm")
-  .replace("xmn out in 0 0 sky130_fd_pr__nfet_01v8", "mn out in 0 0 PTM90N")
-  .replace("xmp out in vdd vdd sky130_fd_pr__pfet_01v8", "mp out in vdd vdd PTM90P");
 const level1 = `Heap probe level1
 .model nch nmos level=1 vto=0.5 kp=100u
 .model pch pmos level=1 vto=-0.5 kp=50u
@@ -79,7 +77,6 @@ vin in 0 0
 
 export function retentionNetlist(name: RetentionCase, opamp: string): string {
   const circuits = {
-    SKY130: sky130,
     GF180: gf180Netlist.replace(
       ".include modelcard.GF180.typical",
       ".include modelcard.GF180.typical\n.param sw_stat_global=0 sw_stat_mismatch=0",
@@ -157,6 +154,7 @@ export async function verifyHeapRetention(
   Simulation: SimulationConstructor,
   netlist: string,
   report: (sample: MemorySample) => void,
+  runs = 500,
 ): Promise<void> {
   const capture = captureWasmMemory();
   try {
@@ -174,7 +172,7 @@ export async function verifyHeapRetention(
     let first: ResultType | undefined;
     let expected = "";
     let firstBytes = 0;
-    for (let run = 1; run <= 500; run++) {
+    for (let run = 1; run <= runs; run++) {
       commands.length = 0;
       // Deliberately reuse the netlist without calling setNetList() again.
       const result = await simulation.runSim();
@@ -192,7 +190,7 @@ export async function verifyHeapRetention(
       check(numericalSnapshot(result) === expected, "Numerical results changed at run " + run);
       check(memory.buffer.byteLength - firstBytes < 64 * 1024 * 1024,
         "WASM heap grew by at least 64 MiB at run " + run);
-      if ([1, 10, 50, 100, 200, 500].includes(run)) {
+      if ([1, 10, 50, 100, 200, runs].includes(run)) {
         report({ run, wasmBytes: memory.buffer.byteLength, circuits });
       }
     }

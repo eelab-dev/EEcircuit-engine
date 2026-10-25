@@ -39,6 +39,9 @@ async function main() {
         console.log("\n--- Testing Source ---");
         await runCommand("npx", ["tsx", "test/test.ts", ...args]);
 
+        console.log("\n--- Testing Simulator Logging ---");
+        await runCommand("npx", ["tsx", "test/test-simulator-logging.ts"]);
+
         // 2.3 Run an actual .noise simulation and validate header
         console.log("\n--- Running .noise simulation ---");
         await runCommand("npx", ["tsx", "test/test-noise-run.ts"]);

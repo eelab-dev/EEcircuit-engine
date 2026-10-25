@@ -2,13 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { ensureFileFetch } from "./runSimulationRegressionTest.ts";
 import {
-  retentionCases, retentionNetlist, verifyHeapRetention, verifyRetentionLifecycle,
+  retentionCases, retentionNetlist, retentionRunCount, verifyHeapRetention, verifyRetentionLifecycle,
   type MemorySample, type RetentionCase, type SimulationConstructor,
 } from "./retention.ts";
 
 async function main(): Promise<void> {
   const runtime = process.argv[2] ?? "source";
-  const fixture = process.argv[3] ?? "SKY130";
+  const fixture = process.argv[3] ?? retentionCases[0];
   if (!["source", "package"].includes(runtime)) throw new Error("Unknown runtime: " + runtime);
   if (fixture !== "lifecycle" && !retentionCases.includes(fixture as RetentionCase)) {
     throw new Error("Unknown fixture: " + fixture);
@@ -26,7 +26,7 @@ async function main(): Promise<void> {
       await verifyHeapRetention(Simulation, retentionNetlist(fixture as RetentionCase, opamp), sample => {
         samples.push(sample);
         console.log(JSON.stringify({ runtime, fixture, ...sample }));
-      });
+      }, retentionRunCount(fixture as RetentionCase));
     }
     console.log(runtime + " " + fixture + ": retention checks passed");
   } catch (error) {

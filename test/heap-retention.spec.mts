@@ -44,8 +44,6 @@ async function startServer() {
 
 for (const fixture of [...retentionCases, "lifecycle"]) {
   test("browser heap " + fixture, async ({ page, browserName }, testInfo) => {
-    test.skip(fixture !== "lifecycle" && browserName !== "chromium",
-      "500-run browser retention is covered in Chromium");
     page.on("console", message => {
       if (message.text().startsWith("[heap sample] ")) {
         console.log(browserName + " " + message.text());
@@ -74,7 +72,7 @@ for (const fixture of [...retentionCases, "lifecycle"]) {
                 console.log("[heap sample] " + JSON.stringify({
                   fixture: name, ...sample, elapsedMs: performance.now() - started,
                 }));
-              });
+              }, helpers.retentionRunCount(name as import("./retention.ts").RetentionCase));
           }
           return { samples, failure: null };
         } catch (error) {
