@@ -13,6 +13,7 @@ type ModuleType = {
   runThings: () => void;
   print: (e?: any) => void;
   printErr: (e?: any) => void;
+  onExit: (status: number) => void;
 };
 
 /**
