@@ -25,7 +25,7 @@ async function runCommand(command: string, args: string[], env: NodeJS.ProcessEn
 
 async function main() {
     const args = process.argv.slice(2);
-    const version = args[0]; // "next" or undefined (main)
+    const version = args.find(arg => arg === "main" || arg === "next"); // "next" or undefined (main)
 
     try {
         await runCommand("npm", ["run", "check"]);
@@ -37,10 +37,13 @@ async function main() {
 
         // 2. Test Source
         console.log("\n--- Testing Source ---");
-        await runCommand("npx", ["tsx", "test/test.ts", ...args]);
+        await runCommand("npx", ["tsx", "test/test.ts", ...(version ? [version] : [])]);
 
         console.log("\n--- Testing Simulator Logging ---");
         await runCommand("npx", ["tsx", "test/test-simulator-logging.ts"]);
+
+        await runCommand(process.execPath, ["--import", "tsx", "test/xspice/run.ts"]);
+        await runCommand(process.execPath, ["--import", "tsx", "test/test-simulation-errors.ts"]);
 
         // 2.3 Run an actual .noise simulation and validate header
         console.log("\n--- Running .noise simulation ---");
@@ -58,7 +61,7 @@ async function main() {
 
         // 3. Test Package
         console.log("\n--- Testing Package ---");
-        await runCommand("npx", ["tsx", "test/test-package.ts", ...args]);
+        await runCommand("npx", ["tsx", "test/test-package.ts", ...(version ? [version] : [])]);
 
         await runCommand("npm", ["run", "test:consumer"]);
 
@@ -76,12 +79,14 @@ async function main() {
         if (version === "next") {
             browserEnv.REF_VERSION = "next";
         }
-        await runCommand(
-            "npx",
-            ["playwright", "test", "test/test-browser-regression.spec.mts",
-                "test/benchmark-opamp.spec.mts", "test/heap-retention.spec.mts"],
-            browserEnv
-        );
+        if (!args.includes("--node-only")) {
+            await runCommand(
+                "npx",
+                ["playwright", "test", "test/test-browser-regression.spec.mts",
+                    "test/benchmark-opamp.spec.mts", "test/heap-retention.spec.mts", "test/xspice/browser.spec.mts"],
+                browserEnv
+            );
+        }
 
         console.log("\nAll tests passed successfully!");
     } catch (error) {
@@ -90,4 +95,4 @@ async function main() {
     }
 }
 
-main();
+main().catch(error => { console.error(error); process.exitCode = 1; });

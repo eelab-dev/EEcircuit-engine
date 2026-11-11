@@ -134,3 +134,7 @@ Oxlint's configuration was ported with the official migration tool. Existing
 rule severities, options, environments, and generated-file exclusions are explicit
 in `.oxlintrc.json`; no additional style preset is enabled. The strict-mode parser
 rejects legacy octal literals, covered by `test/fixtures/legacy-octal.txt`.
+
+## XSPICE and simulator failures
+
+See [XSPICE support](XSPICE.md) for analytical fixtures and same-release native comparisons. `npm run test:node` runs the shared Node checks without launching Playwright; `npm run test:browser:all` includes source/package XSPICE and error handling coverage. Retention now also exercises all three static XSPICE models for 500 runs and transitions between XSPICE and ordinary circuits.

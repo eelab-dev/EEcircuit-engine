@@ -59,3 +59,7 @@ console.log(result);
 ## Simulation Models
 
 For the list of supported models, please refer to the [model documentation](models.md).
+
+## XSPICE
+
+The engine statically includes `spice2poly`, `pwl`, and `pswitch`. See [XSPICE support](XSPICE.md) for supported primitives, native netlists, latest-stable builds, and test commands.

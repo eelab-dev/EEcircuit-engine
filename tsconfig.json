@@ -1,6 +1,6 @@
 {
-  "include": ["src", "types"],
-  "exclude": ["src/spice.ts", "src/spice.d.ts"],
+  "include": ["src", "types", "test", "scripts/**/*.mts", "Docker/**/*.mts", "vite.config.mts", "playwright.config.ts"],
+  "exclude": ["src/spice.ts", "src/spice.d.ts", "test/local/**", "Docker/build/**"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",

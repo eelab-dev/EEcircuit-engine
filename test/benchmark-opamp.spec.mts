@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { AddressInfo } from "node:net";
 import fs from "node:fs/promises";
-import http from "node:http";
+import { createAsyncServer } from "./http-server.ts";
 import type { Server } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -65,7 +65,7 @@ async function startStaticServer(
 	const resolvedRoot = path.resolve(rootDir);
 
 	return await new Promise((resolve, reject) => {
-		const server = http.createServer(async (req, res) => {
+		const server = createAsyncServer(async (req, res) => {
 			try {
 				const requestUrl = new URL(req.url ?? "/", "http://127.0.0.1");
 				const relativePath = decodeURIComponent(requestUrl.pathname);

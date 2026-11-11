@@ -1,0 +1,5 @@
+[
+  {"name": "spice2poly", "source": "spice2poly/icm_spice2poly", "symbol": "spice2poly"},
+  {"name": "pwl", "source": "analog/pwl", "symbol": "cm_pwl"},
+  {"name": "pswitch", "source": "xtradev/pswitch", "symbol": "cm_pswitch"}
+]

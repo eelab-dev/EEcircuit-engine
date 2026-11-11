@@ -61,12 +61,21 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
   const resultStr = ab2str(copiedData);
 
   const offset = resultStr.indexOf("Binary:");
+  if (offset < 0) throw new Error("Missing binary ngspice output header");
   log(`file-> ${offset}`);
   const header = resultStr.substring(0, offset) + "\n";
 
   //let out: number[];
   const out: number[] = [] as number[];
   const param = findParams(header);
+  if (!Number.isInteger(param.varNum) || param.varNum <= 0 ||
+      !Number.isInteger(param.pointNum) || param.pointNum <= 0) {
+    throw new Error("Empty or invalid ngspice output dimensions");
+  }
+  const expectedBytes = param.varNum * param.pointNum * 8 * (param.dataType === "complex" ? 2 : 1);
+  if (copiedData.byteLength - offset - 8 !== expectedBytes) {
+    throw new Error("Truncated or inconsistent ngspice output");
+  }
   log(header);
   log(param);
 
@@ -74,6 +83,7 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
 
   for (let i = 0; i < view.byteLength; i = i + 8) {
     const d = view.getFloat64(i, true);
+    if (!Number.isFinite(d)) throw new Error("Nonfinite ngspice output");
     out.push(d);
     //log(`float -> ${d}`);
   }
@@ -81,9 +91,7 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
   log("🤔", out);
 
   if (param.dataType === "complex") {
-    const out2 = new Array(param.varNum)
-      .fill(0)
-      .map(() => new Array(param.pointNum).fill(0)) as ComplexNumber[][];
+    const out2 = Array.from({ length: param.varNum }, () => new Array<ComplexNumber>(param.pointNum));
     //https://gregstoll.com/~gregstoll/floattohex/
     //
     for (let i = 0; i < out.length; i = i + 2) {
@@ -103,9 +111,7 @@ export function readRawOutput(rawData: Uint8Array): RawResultType {
     return rawResult;
   } else {
     // Real
-    const out2 = new Array(param.varNum)
-      .fill(0)
-      .map(() => new Array(param.pointNum).fill(0)) as RealNumber[][];
+    const out2 = Array.from({ length: param.varNum }, () => new Array<RealNumber>(param.pointNum).fill(0));
     //https://gregstoll.com/~gregstoll/floattohex/
     //
     out.forEach((e, i) => {
@@ -192,6 +198,8 @@ export function readOutput(output: Uint8Array): ResultType {
       }))
       .filter((item) => item.type !== "notype");
 
+    if (!filteredData.length) throw new Error("No supported ngspice output variables");
+
     return {
       header: header,
       numVariables: filteredData.length,
@@ -214,6 +222,8 @@ export function readOutput(output: Uint8Array): ResultType {
         index: i,
       }))
       .filter((item) => item.type !== "notype");
+
+    if (!filteredData.length) throw new Error("No supported ngspice output variables");
 
     return {
       header: header,

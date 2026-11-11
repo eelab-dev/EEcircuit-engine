@@ -1,7 +1,7 @@
 import type { ResultType } from "../src/readOutput.ts";
 import { gf180Netlist } from "./gf180/netlist.ts";
 
-export const retentionCases = ["GF180", "PTM90", "opamp", "level1"] as const;
+export const retentionCases = ["GF180", "PTM90", "opamp", "level1", "XSPICE"] as const;
 export type RetentionCase = typeof retentionCases[number];
 export function retentionRunCount(fixture: RetentionCase): number {
   return fixture === "opamp" ? 100 : 500;
@@ -26,8 +26,10 @@ export function captureWasmMemory() {
   const memories: WebAssembly.Memory[] = [];
   const instantiate = WebAssembly.instantiate;
   const streaming = WebAssembly.instantiateStreaming;
-  const observe = (result: WebAssembly.Instance | WebAssembly.WebAssemblyInstantiatedSource) => {
-    const instance = result instanceof WebAssembly.Instance ? result : result.instance;
+  const observe = (result: unknown): unknown => {
+    const instance = result instanceof WebAssembly.Instance ? result
+      : typeof result === "object" && result !== null && "instance" in result ? result.instance : undefined;
+    check(instance instanceof WebAssembly.Instance, "WASM instantiation did not return an instance");
     const memory = Object.values(instance.exports).find(value => value instanceof WebAssembly.Memory);
     check(memory, "WASM instance did not export its memory");
     memories.push(memory);
@@ -35,12 +37,14 @@ export function captureWasmMemory() {
   };
   WebAssembly.instantiate = new Proxy(instantiate, {
     apply(target, receiver, args) {
-      return Reflect.apply(target, receiver, args).then(observe);
+      const result: unknown = Reflect.apply(target, receiver, args);
+      return Promise.resolve(result).then(observe);
     },
   });
   WebAssembly.instantiateStreaming = new Proxy(streaming, {
     apply(target, receiver, args) {
-      return Reflect.apply(target, receiver, args).then(observe);
+      const result: unknown = Reflect.apply(target, receiver, args);
+      return Promise.resolve(result).then(observe);
     },
   });
   return {
@@ -75,6 +79,22 @@ vin in 0 0
 .end
 `;
 
+const xspice = `Heap probe XSPICE
+V1 in 0 SIN(0 1 1k)
+E1 poly 0 POLY(1) in 0 1 2 3
+A1 in out map
+.model map pwl(x_array=[-2 0 2] y_array=[-2 0 2])
+VS supply 0 1
+A2 %gd(in 0) %gd(supply switched) sw
+.model sw pswitch(cntl_off=-1 cntl_on=1 r_off=1000 r_on=100 log=FALSE)
+R1 out 0 1k
+R2 poly 0 1k
+R3 switched 0 1k
+.tran 10u 1m
+.save v(in) v(out) v(poly) v(switched)
+.end
+`;
+
 export function retentionNetlist(name: RetentionCase, opamp: string): string {
   const circuits = {
     GF180: gf180Netlist.replace(
@@ -84,6 +104,7 @@ export function retentionNetlist(name: RetentionCase, opamp: string): string {
     PTM90: ptm90,
     opamp,
     level1,
+    XSPICE: xspice,
   };
   return circuitDiagnostics(circuits[name]);
 }
@@ -224,6 +245,9 @@ export async function verifyRetentionLifecycle(Simulation: SimulationConstructor
     await simulation.start();
     await runCircuit();
     await runCircuit(ptm90);
+    await runCircuit(xspice);
+    await runCircuit(level1);
+    await runCircuit(xspice);
     const noise = `Noise lifecycle
 V1 in 0 AC 1
 R1 in out 1k

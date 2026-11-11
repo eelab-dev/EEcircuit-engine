@@ -20,4 +20,4 @@ async function runBenchmark() {
     console.log(`Simulation completed in ${(end - start).toFixed(2)}ms`);
 }
 
-runBenchmark();
+runBenchmark().catch(error => { console.error(error); process.exitCode = 1; });

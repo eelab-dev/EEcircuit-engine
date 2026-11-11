@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "common": {
+    "ngspiceRepository": "https://github.com/danchitnis/ngspice-sf-mirror.git",
+    "emsdkRepository": "https://github.com/emscripten-core/emsdk.git",
+    "configure": [
+      "--disable-debug",
+      "--disable-openmp",
+      "--enable-xspice",
+      "--without-x",
+      "--with-readline=no"
+    ],
+    "emscriptenFlags": [
+      "-O2",
+      "-sASYNCIFY=1",
+      "-sASYNCIFY_ADVISE=0",
+      "-sASYNCIFY_IGNORE_INDIRECT=0",
+      "-sENVIRONMENT=web,worker",
+      "-sALLOW_MEMORY_GROWTH=1",
+      "-sMODULARIZE=1",
+      "-sEXPORT_ES6=1",
+      "-sINCOMING_MODULE_JS_API=[\"arguments\",\"wasmBinary\",\"locateFile\",\"noInitialRun\",\"noExitRuntime\",\"print\",\"printErr\",\"preRun\",\"onAbort\",\"onRuntimeInitialized\",\"instantiateWasm\"]",
+      "-sEXPORTED_RUNTIME_METHODS=[\"FS\",\"Asyncify\",\"callMain\"]"
+    ]
+  },
+  "profiles": {
+    "standard": {
+      "configure": [
+        "--disable-osdi"
+      ]
+    }
+  },
+  "dependencies": {
+    "ubuntu": "ubuntu:latest",
+    "emscripten": "latest",
+    "ngspiceRevision": null
+  }
+}

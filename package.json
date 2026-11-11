@@ -28,11 +28,16 @@
     "test:package": "npx tsx test/test-package.ts",
     "test:browser": "npx playwright test test/test-browser-regression.spec.mts",
     "test:browser:all": "npx playwright test",
-    "lint": "oxlint . --report-unused-disable-directives",
-    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tests.json",
+    "lint": "oxlint . --type-aware --type-check --deny-warnings --report-unused-disable-directives",
+    "typecheck": "tsc -p tsconfig.json",
     "build:types": "tsc -p tsconfig.declarations.json",
     "test:consumer": "tsx test/test-consumers.mts",
-    "test:toolchain": "tsx test/test-toolchain.mts"
+    "test:toolchain": "tsx test/test-toolchain.mts",
+    "test:xspice": "node --import tsx test/xspice/run.ts",
+    "test:errors": "node --import tsx test/test-simulation-errors.ts",
+    "test:node": "node --import tsx test/run-all.ts --node-only",
+    "test:xspice:native": "node --import tsx test/xspice/native.ts",
+    "test:upstream": "node --import tsx test/test-upstream-regression.ts"
   },
   "author": "Danial Chitnis",
   "license": "MIT",
@@ -41,6 +46,7 @@
     "@types/node": "^26.6.5",
     "esbuild": "^0.28.2",
     "oxlint": "1.89.0",
+    "oxlint-tsgolint": "^7.0.2006",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5"

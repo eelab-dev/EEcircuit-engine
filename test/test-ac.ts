@@ -88,4 +88,4 @@ vin 1 0 0 pulse (0 1.8 0 0.1 0.1 15 30)
 	writeFileSync("./ac.json", JSON.stringify(result, null, 2));
 }
 
-main();
+main().catch(error => { console.error(error); process.exitCode = 1; });

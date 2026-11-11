@@ -1,0 +1,27 @@
+--- a/src/xspice/Makefile.am
++++ b/src/xspice/Makefile.am
+@@ -9,7 +9,7 @@
+              tlines/msline_common.c tlines/msline_common.h \
+              tlines/tline_common.c tlines/tline_common.h
+ 
+-SUBDIRS = mif cm enh evt idn cmpp icm verilog vhdl
++SUBDIRS = mif cm enh evt idn
+ 
+ dist-hook:
+ 	rm -f "$(distdir)/icm/makedefs"
+--- a/src/spicelib/devices/dev.c
++++ b/src/spicelib/devices/dev.c
+@@ -262,6 +262,13 @@
+ 
+     for (i = 0; i < DEVNUM; i++)
+         DEVices[i] = static_devices[i]();
++#ifdef XSPICE
++    {
++        /* Register before SIMinit publishes the final device table. */
++        extern void eecircuit_register_models(SPICEdev ***, int **, int *);
++        eecircuit_register_models(&DEVices, &DEVicesfl, &DEVNUM);
++    }
++#endif
+ }
+ 
+ int num_devices(void)

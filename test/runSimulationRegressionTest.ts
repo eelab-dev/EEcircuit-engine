@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { referenceVersion, type BuildReferenceMeta } from "./referenceVersion.ts";
 import { deepCompare } from "./compare.ts";
 import type { ResultType } from "../src/readOutput.ts";
 
@@ -74,17 +75,21 @@ export async function runSimulation(
     return await sim.runSim();
 }
 
-export function getActiveBuildVersion(): string {
-    try {
-        const metaPath = join(dirname(fileURLToPath(import.meta.url)), "../src/build-meta.json");
-        const meta = JSON.parse(readFileSync(metaPath, "utf-8")) as { version?: string };
-        if (meta.version === "next" || meta.version === "main") {
-            return meta.version;
+export function getActiveBuildMetadata(): BuildReferenceMeta & { version: "main" | "next"; profile: string } {
+    const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+    for (const metaPath of [join(root, "Docker/build/active/build-meta.json"), join(root, "src/build-meta.json"), join(root, "dist/build-meta.json")]) {
+        try {
+            const meta = JSON.parse(readFileSync(metaPath, "utf-8")) as BuildReferenceMeta & { profile?: string };
+            return { ...meta, version: meta.version === "next" ? "next" : "main", profile: meta.profile ?? "standard" };
+        } catch {
+            /* Try packaged metadata, then the default reference. */
         }
-    } catch {
-        /* Fallback */
     }
-    return "main";
+    return { version: "main", profile: "standard" };
+}
+
+export function getActiveBuildVersion(): "main" | "next" {
+    return referenceVersion(getActiveBuildMetadata());
 }
 
 export async function runSimulationRegressionTest(

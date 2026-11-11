@@ -1,7 +1,8 @@
+import { referenceVersion, type BuildReferenceMeta } from "./referenceVersion.ts";
 import { expect, test } from "@playwright/test";
 import type { AddressInfo } from "node:net";
 import fs from "node:fs/promises";
-import http from "node:http";
+import { createAsyncServer } from "./http-server.ts";
 import type { Server } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -71,23 +72,12 @@ async function startStaticServer(
 	rootDir: string
 ): Promise<{ server: Server; port: number }> {
 	const resolvedRoot = path.resolve(rootDir);
-	let version = process.env.REF_VERSION;
-	if (!version) {
-		try {
-			const metaPath = path.join(resolvedRoot, "src", "build-meta.json");
-			const content = await fs.readFile(metaPath, "utf-8");
-			const meta = JSON.parse(content) as { version?: string };
-			if (meta.version === "next" || meta.version === "main") {
-				version = meta.version;
-			}
-		} catch {
-			/* Fallback */
-		}
-	}
-	if (!version) version = "main";
+	const metaPath = path.join(resolvedRoot, "src", "build-meta.json");
+	const content = await fs.readFile(metaPath, "utf-8");
+	const version = process.env.REF_VERSION ?? referenceVersion(JSON.parse(content) as BuildReferenceMeta);
 
 	return await new Promise((resolve, reject) => {
-		const server = http.createServer(async (req, res) => {
+		const server = createAsyncServer(async (req, res) => {
 			try {
 				const requestUrl = new URL(req.url ?? "/", "http://127.0.0.1");
 				let relativePath = decodeURIComponent(requestUrl.pathname);

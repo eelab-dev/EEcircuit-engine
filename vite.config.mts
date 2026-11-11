@@ -3,6 +3,19 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  plugins: [
+    {
+      name: "engine-library-url-base",
+      enforce: "post",
+      transform(code, id) {
+        if (id !== resolve(import.meta.dirname, "src/profiles/standard.ts") &&
+            id !== resolve(import.meta.dirname, "src/spice.js")) return;
+        // Vite has already inlined WASM assets here. UMD has no import.meta.url;
+        // give those absolute data URLs a valid base when loaded through require().
+        return code.replaceAll("import.meta.url", '(import.meta.url || "file:///")');
+      },
+    },
+  ],
   build: {
     lib: {
       // Could also be a dictionary or array of multiple entry points

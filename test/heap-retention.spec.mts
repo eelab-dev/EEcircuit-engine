@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
-import http from "node:http";
+import { createAsyncServer } from "./http-server.ts";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { transform } from "esbuild";
@@ -10,7 +10,7 @@ const root = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
 test.setTimeout(180_000);
 
 async function startServer() {
-  const server = http.createServer(async (request, response) => {
+  const server = createAsyncServer(async (request, response) => {
     try {
       const pathname = new URL(request.url ?? "/", "http://127.0.0.1").pathname;
       const filename = path.resolve(root, "." + decodeURIComponent(pathname));

@@ -1,32 +1,27 @@
+import { gf180ReferenceVersion } from "../referenceVersion.ts";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Simulation } from "../../src/simulationLink.ts";
+import { getActiveBuildMetadata } from "../runSimulationRegressionTest.ts";
 import { runSimulation } from "../runSimulationRegressionTest.ts";
-import { gf180Netlist } from "./netlist.ts";
+import { createGF180RegressionSimulation, gf180RegressionNetlist } from "./fixture.ts";
 
-async function generateRef(version: string) {
-    console.log(`Generating GF180 reference data for version: ${version}`);
-    const result = await runSimulation(() => new Simulation(), gf180Netlist);
-
-    const refDir = join(dirname(fileURLToPath(import.meta.url)), `../ref-${version}`);
-    mkdirSync(refDir, { recursive: true });
-
-    const refPath = join(refDir, "gf180_ref.json");
-    writeFileSync(refPath, JSON.stringify(result, null, 4));
-    console.log(`Wrote reference data to: ${refPath}`);
-}
+const engineMetadata = getActiveBuildMetadata();
 
 async function main(): Promise<void> {
-    const args = process.argv.slice(2);
-    const targetVersion = args[0];
-
-    if (targetVersion) {
-        await generateRef(targetVersion);
-    } else {
-        await generateRef("main");
-        await generateRef("next");
+    const [channel = engineMetadata.version, outputFlag, outputDirectory] = process.argv.slice(2);
+    if (channel !== "main" && channel !== "next") throw new Error("Reference channel must be main or next");
+    if (channel !== engineMetadata.version) throw new Error(`Cannot generate ${channel} reference using ${engineMetadata.version} engine`);
+    if (outputFlag !== undefined && (outputFlag !== "--output-dir" || !outputDirectory)) {
+        throw new Error("Usage: genRefs.ts [main|next] [--output-dir DIRECTORY]");
     }
+    const result = await runSimulation(createGF180RegressionSimulation, gf180RegressionNetlist);
+    const reference = gf180ReferenceVersion(engineMetadata);
+    const directory = outputDirectory ?? join(dirname(fileURLToPath(import.meta.url)), `../ref-${reference}`);
+    mkdirSync(directory, { recursive: true });
+    const filename = join(directory, "gf180_ref.json");
+    writeFileSync(filename, JSON.stringify(result, null, 4) + "\n");
+    console.log(`Wrote ${engineMetadata.profile}/${channel} GF180 reference to ${filename}`);
 }
 
 main().catch((error) => {
